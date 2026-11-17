@@ -1,1 +1,1707 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Dar Aldawa - Executive Intelligence Suite</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Almarai:wght@400;700;800&amp;family=Poppins:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&amp;display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  darkMode: "class",
+  theme: {
+    extend: {
+      colors: {
+        "secondary-container":"#76f4e0","on-secondary-fixed":"#00201c","surface-bright":"#fcf9f8",
+        "outline":"#737782","background":"#fcf9f8","on-secondary-container":"#006f63",
+        "tertiary":"#353838","surface-container-high":"#eae7e7","inverse-primary":"#adc6ff",
+        "primary-container":"#099999","secondary-fixed":"#79f7e3","primary-fixed-dim":"#adc6ff",
+        "error-container":"#ffdad6","on-primary-container":"#a2bfff","secondary":"#006b5f",
+        "on-background":"#1b1c1c","surface-container":"#f0eded","on-surface":"#1b1c1c",
+        "on-primary":"#ffffff","surface-dim":"#dcd9d9","on-surface-variant":"#434751",
+        "error":"#ba1a1a","on-error-container":"#93000a","primary":"#003577",
+        "outline-variant":"#c3c6d2","on-error":"#ffffff",
+      },
+fontFamily: {
+        sans: ["Poppins", "Almarai", "sans-serif"],
+        "headline-xl":["Poppins", "Almarai"],
+        "headline-md":["Poppins", "Almarai"],
+        "display-lg":["Poppins", "Almarai"],
+        "body-sm":["Poppins", "Almarai"],
+        "body-lg":["Poppins", "Almarai"],
+        "body-md":["Poppins", "Almarai"],
+        "label-bold":["Poppins", "Almarai"],
+        "label-md":["Poppins", "Almarai"]
+      },
+      fontSize: {
+        "headline-xl":["32px",{"lineHeight":"1.2","letterSpacing":"-0.01em","fontWeight":"600"}],
+        "body-sm":["14px",{"lineHeight":"1.5","fontWeight":"400"}],
+        "headline-md":["24px",{"lineHeight":"1.3","fontWeight":"600"}],
+        "body-lg":["18px",{"lineHeight":"1.6","fontWeight":"400"}],
+        "display-lg":["48px",{"lineHeight":"1.1","letterSpacing":"-0.02em","fontWeight":"700"}],
+        "label-bold":["12px",{"lineHeight":"1.2","letterSpacing":"0.05em","fontWeight":"600"}],
+        "body-md":["16px",{"lineHeight":"1.5","fontWeight":"400"}],
+        "label-md":["12px",{"lineHeight":"1.2","fontWeight":"500"}]
+      },
+      spacing: {
+        "base":"8px","lg":"40px","gutter":"24px","xs":"4px","margin":"32px",
+        "xl":"64px","md":"24px","sm":"12px"
+      },
+      borderRadius: { "DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px" }
+    }
+  }
+}
+</script>
 
+<style>
+/* ── Base ── */
+*, *::before, *::after { box-sizing: border-box; }
+body { 
+  background-color: #f4f6fb;
+  background-image: radial-gradient(at 0% 0%, hsla(217,100%,96%,1) 0px, transparent 50%),
+                    radial-gradient(at 100% 0%, hsla(210,100%,94%,1) 0px, transparent 50%);
+  background-attachment: fixed;
+  font-family: 'Poppins', 'Almarai', sans-serif; 
+  color: #1b1c1c; 
+  margin: 0; 
+}
+
+/* ── True Glassmorphism ── */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 8px 32px rgba(31, 76, 148, 0.05); /* ظل مائل للون العلامة التجارية */
+}
+
+/* ── Material Icons ── */
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+  user-select: none;
+  vertical-align: middle;
+}
+/* زيادة سمك الأيقونة عند التفعيل لزيادة التباين */
+.nav-item.nav-active .nav-icon { 
+  font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24; 
+}
+/* ── Sidebar ── */
+#sidebar {
+  width: 260px;
+  min-width: 260px;
+  transition: width 0.3s cubic-bezier(.4,0,.2,1), min-width 0.3s cubic-bezier(.4,0,.2,1);
+background: rgba(255, 255, 255, 0.85);
+backdrop-filter: blur(20px);
+-webkit-backdrop-filter: blur(20px);
+border-right: 1px solid rgba(255, 255, 255, 0.5);
+box-shadow: 4px 0 32px rgba(31, 76, 148, 0.04);
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  overflow: hidden;
+}
+#sidebar.collapsed {
+  width: 72px;
+  min-width: 72px;
+}
+#sidebar.collapsed .nav-label,
+#sidebar.collapsed .sidebar-title,
+#sidebar.collapsed .sidebar-sub,
+#sidebar.collapsed .sidebar-bottom-label {
+  opacity: 0;
+  pointer-events: none;
+  width: 0;
+  overflow: hidden;
+}
+#sidebar.collapsed .logo-area { justify-content: center; padding: 0 12px; }
+#sidebar.collapsed .nav-item { justify-content: center; padding: 12px; margin: 2px 8px; }
+#sidebar.collapsed .nav-icon { margin: 0; }
+#sidebar.collapsed #collapse-btn { transform: rotate(180deg); }
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  padding: 10px 14px;
+  margin: 2px 10px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #555e6d;
+  transition: all 0.18s ease;
+  text-decoration: none;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.nav-item:hover { background: #f0f4ff; color: #099999; }
+.nav-item.nav-active { background: linear-gradient(135deg, #eef2ff 0%, #dde9ff 100%); color: #099999; font-weight: 600; }
+.nav-item.nav-active .nav-icon { font-variation-settings: 'FILL' 1, 'wght' 600, 'GRAD' 0, 'opsz' 24; }
+.nav-icon { font-size: 20px; margin-right: 10px; flex-shrink: 0; color: inherit; transition: margin 0.3s; }
+.nav-label { transition: opacity 0.2s, width 0.3s; overflow: hidden; }
+
+/* ── Top Header ── */
+#topbar {
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+  height: 64px;
+  display: flex;
+  align-items: center;
+  padding: 0 28px;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  box-shadow: 0 2px 16px rgba(0,53,119,0.05);
+}
+
+/* ── Filter Bar ── */
+#filter-bar {
+  background: rgba(255,255,255,0.9);
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+  padding: 10px 28px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.filter-btn {
+  padding: 6px 18px;
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1.5px solid #d0d8e8;
+  background: white;
+  color: #555e6d;
+  transition: all 0.18s ease;
+  letter-spacing: 0.02em;
+}
+.filter-btn:hover { border-color: #099999; color: #099999; background: #f0f4ff; }
+.filter-btn.active { background: #099999; color: white; border-color: #099999; box-shadow: 0 2px 10px rgba(31,76,148,0.3); }
+
+/* ── Section transition ── */
+.section-content { animation: sectionIn 0.35s cubic-bezier(.4,0,.2,1); }
+@keyframes sectionIn {
+  from { opacity:0; transform: translateY(14px); }
+  to   { opacity:1; transform: translateY(0); }
+}
+
+/* ── KPI counter animation ── */
+@keyframes countUp {
+  from { opacity:0; transform: translateY(6px) scale(0.96); }
+  to   { opacity:1; transform: translateY(0) scale(1); }
+}
+.kpi-animating { animation: countUp 0.5s cubic-bezier(.4,0,.2,1); }
+
+/* ── Skeleton loader ── */
+.skeleton {
+  background: linear-gradient(90deg, #e8eaf0 25%, #f4f6f8 50%, #e8eaf0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+  border-radius: 8px;
+}
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+#skeleton-overlay {
+  position: absolute; inset: 0; z-index: 10;
+  background: rgba(240,242,245,0.85);
+  display: flex; flex-direction: column; gap: 16px;
+  padding: 32px 28px;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+#skeleton-overlay.hidden { opacity: 0; pointer-events: none; }
+
+/* ── Notification Panel ── */
+#notif-panel {
+  position: fixed;
+  top: 72px; right: 16px;
+  width: 360px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.15), 0 4px 20px rgba(0,53,119,0.1);
+  border: 1px solid rgba(0,0,0,0.07);
+  z-index: 200;
+  transform: translateY(-8px) scale(0.97);
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.25s cubic-bezier(.4,0,.2,1);
+  max-height: 520px;
+  overflow-y: auto;
+}
+#notif-panel.open {
+  transform: translateY(0) scale(1);
+  opacity: 1;
+  pointer-events: all;
+}
+
+/* ── Search Overlay ── */
+#search-overlay {
+  position: fixed; inset: 0; z-index: 300;
+  background: rgba(0,0,0,0.4);
+  display: flex; align-items: flex-start; justify-content: center;
+  padding-top: 100px;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.2s;
+  backdrop-filter: blur(4px);
+}
+#search-overlay.open { opacity: 1; pointer-events: all; }
+#search-box {
+  background: white;
+  border-radius: 16px;
+  width: 560px;
+  max-width: 90vw;
+  box-shadow: 0 30px 80px rgba(0,0,0,0.2);
+  overflow: hidden;
+}
+#search-input {
+  width: 100%; padding: 18px 20px 18px 52px;
+  font-size: 16px; border: none; outline: none;
+  font-family: Inter, sans-serif;
+  border-bottom: 1px solid #f0f0f0;
+}
+#search-results { padding: 8px; }
+.search-result-item {
+  padding: 10px 14px; border-radius: 8px;
+  cursor: pointer; display: flex; align-items: center; gap: 10px;
+  transition: background 0.15s;
+  font-size: 14px;
+}
+.search-result-item:hover { background: #f0f4ff; }
+
+/* ── Online indicator pulse ── */
+@keyframes pulse-dot {
+  0%,100% { transform: scale(1); opacity:1; }
+  50% { transform: scale(1.4); opacity:0.7; }
+}
+.pulse-dot { animation: pulse-dot 2s infinite; }
+
+/* ── Progress bar animation ── */
+.progress-fill {
+  transition: width 0.8s cubic-bezier(.4,0,.2,1);
+}
+
+/* ── Chart path animation ── */
+.chart-path {
+  stroke-dasharray: 1000;
+  stroke-dashoffset: 1000;
+  animation: drawLine 1.2s cubic-bezier(.4,0,.2,1) forwards;
+}
+@keyframes drawLine {
+  to { stroke-dashoffset: 0; }
+}
+
+/* ── Collapse btn ── */
+#collapse-btn {
+  transition: transform 0.3s cubic-bezier(.4,0,.2,1);
+  cursor: pointer;
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #d0d8e8; border-radius: 99px; }
+
+#filter-bar { flex-wrap: wrap; }
+#period-context { white-space: normal; }
+.period-panel-body { min-width: 0; }
+.period-panel .period-panel-body > :last-child { margin-bottom: 0; }
+#sidebar.collapsed .logo-area img { display: none; }
+#sidebar.collapsed #collapse-btn { margin: 0; }
+.nav-item { width: calc(100% - 20px); text-align: left; }
+#sidebar.collapsed .nav-item { width: calc(100% - 16px); }
+#nav-scrim, #mobile-menu { display: none; }
+#notif-panel:not(.open), #search-overlay:not(.open) { visibility: hidden; }
+#search-results { max-height: min(65dvh, 590px); overflow: auto; }
+button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible {
+  outline: 2px solid #099999;
+  outline-offset: 3px;
+}
+.period-kpi-value { font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.period-kpi-label { line-height: 1.35; }
+.period-panel h3 { text-wrap: balance; }
+#action-dialog {
+  width: min(520px, calc(100vw - 28px));
+  max-height: calc(100dvh - 28px);
+  overflow: auto;
+  border: 1px solid #c5d5dd;
+  border-radius: 18px;
+  padding: 22px;
+  background: #fff;
+  color: #172631;
+  box-shadow: 0 22px 72px #18344640;
+}
+#action-dialog::backdrop { background: #0e233478; }
+.dark #action-dialog { background: #172337; color: #eaf1f6; border-color: #475569; }
+.action-heading { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 18px; }
+#action-title { font-size: 21px; font-weight: 700; }
+#action-description { font-size: 12px; margin-top: 4px; }
+#action-body { font-size: 14px; }
+.action-stack { display: grid; gap: 9px; }
+.action-controls { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.action-primary, .action-secondary, .action-close { border-radius: 9px; padding: 8px 12px; font-weight: 600; cursor: pointer; }
+.action-primary { background: #087c7c; color: white; justify-self: start; }
+.action-secondary, .action-close { border: 1px solid #829ca4; }
+.action-primary:hover { background: #056868; }
+.action-secondary:hover, .action-close:hover { background: #09999918; }
+.action-close { padding: 4px; }
+.action-hint, .action-message { font-size: 12px; }
+.action-message:not(:empty) { margin-top: 12px; font-weight: 600; }
+.action-subtitle { margin-top: 16px; margin-bottom: 6px; font-weight: 700; }
+.action-list-item { border: 1px solid #829ca470; border-radius: 9px; padding: 8px 12px; overflow-wrap: anywhere; }
+.action-list-item p { white-space: pre-wrap; }
+.action-link { text-decoration: underline; margin-top: 5px; font-size: 12px; }
+.action-help { list-style: disc; padding-left: 20px; }
+#draft-form label { font-weight: 600; }
+#draft-form input, #draft-form textarea { background: transparent; color: inherit; border: 1px solid #829ca4; border-radius: 8px; }
+@media (max-width: 767px) {
+  #topbar { padding: 0 10px; gap: 6px; height: auto; min-height: 58px; }
+  #topbar > div, #topbar > div > div { gap: 5px; min-width: 0; }
+  #topbar > div:last-child { flex-shrink: 0; }
+  #topbar > div:last-child > .border-l { display: none; }
+  #topbar h1 { font-size: 12px; }
+  #topbar h1 + p { display: none; }
+  #mobile-menu { display: grid; padding: 7px; place-items: center; flex: 0 0 auto; }
+  #sidebar, #sidebar.collapsed {
+    width: min(260px, 84vw); min-width: 0; position: fixed; left: 0; top: 0; bottom: 0; height: 100dvh;
+    visibility: hidden; transform: translateX(-100%); transition: transform .2s ease, visibility .2s;
+    background: #fff; z-index: 60;
+  }
+  .dark #sidebar { background: #161b2e; }
+  .nav-open #sidebar { visibility: visible; transform: translateX(0); }
+  #sidebar #collapse-btn { display: none; }
+  #sidebar.collapsed .logo-area img { display: block; }
+  #sidebar.collapsed .nav-label, #sidebar.collapsed .sidebar-bottom-label { opacity: 1; width: auto; }
+  #sidebar.collapsed .nav-item { justify-content: flex-start; }
+  #sidebar.collapsed .nav-icon { margin-right: 10px; }
+  .nav-open #nav-scrim { display: block; position: fixed; inset: 0; z-index: 55; background: #10253570; }
+  #filter-bar { padding: 8px 10px; gap: 5px; }
+  #filter-bar .filter-btn { padding: 5px 8px; font-size: 11px; }
+  #period-context { margin-left: 0; flex-basis: 100%; }
+  #notif-panel { left: 8px; right: 8px; width: auto; }
+  .section-content > div { padding: 14px; }
+  .section-content > div > :first-child .flex { flex-wrap: wrap; }
+  .section-content [data-period-kpi] { min-height: 0; padding: 15px; }
+  .section-content .period-panel { min-width: 0; }
+  .section-content h1, .section-content h2 { overflow-wrap: anywhere; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
+@media print {
+  @page { margin: 13mm; }
+  html, body { overflow: visible !important; height: auto !important; background: white !important; }
+  #app-root, #app-root > .flex-1, #content-area { display: block !important; overflow: visible !important; height: auto !important; }
+  #sidebar, #nav-scrim, #mobile-menu, #notif-panel, #search-overlay, #action-dialog, button, #skeleton-overlay { display: none !important; }
+  #topbar { position: static; padding: 0; box-shadow: none; height: auto; }
+  #filter-bar { padding: 5px 0; }
+  #filter-bar > span:first-child { display: none; }
+  #period-context { margin: 0; }
+  .section-content > div { padding: 10px 0 !important; }
+  [data-period-kpi], .period-panel { break-inside: avoid; color: #172631 !important; background: white !important; }
+  * { print-color-adjust: exact; }
+}
+
+/* Readable foreground, surface and chart colors for both themes. */
+:root {
+  color-scheme: light;
+  --theme-page: #f4f6fb;
+  --theme-surface: #ffffff;
+  --theme-subtle: #edf2f7;
+  --theme-text: #172631;
+  --theme-muted: #475569;
+  --theme-accent: #076b6b;
+  --theme-heading: #003577;
+  --theme-accent-soft: #e3f4f2;
+  --theme-control: #087373;
+  --theme-control-hover: #055e60;
+  --theme-border: #c1ceda;
+  --theme-chart-track: #d5e0e9;
+  --theme-chart-secondary: #405a85;
+  --theme-warning: #92400e;
+}
+:root.dark {
+  color-scheme: dark;
+  --theme-page: #111827;
+  --theme-surface: #1b2537;
+  --theme-subtle: #253248;
+  --theme-text: #eef4fb;
+  --theme-muted: #c0ccdc;
+  --theme-accent: #65e0d7;
+  --theme-heading: #b4d2ff;
+  --theme-accent-soft: #1b3e47;
+  --theme-control: #087373;
+  --theme-control-hover: #055e60;
+  --theme-border: #4b5c75;
+  --theme-chart-track: #3b4b63;
+  --theme-chart-secondary: #b0c9fa;
+  --theme-warning: #ffcb72;
+}
+html body { color: var(--theme-text); background-color: var(--theme-page); }
+html.dark body { background-image: none; }
+html.dark #sidebar .logo-area img { background: #fff; border-radius: 8px; padding: 5px 8px; }
+html #sidebar, html #topbar, html #filter-bar, html #notif-panel,
+html #search-box, html #search-input, html #action-dialog {
+  color: var(--theme-text);
+  background-color: var(--theme-surface);
+  border-color: var(--theme-border);
+}
+html #search-input::placeholder { color: var(--theme-muted); opacity: 1; }
+html .glass-panel, html .glass-card, html .section-content .bg-white {
+  background-color: var(--theme-surface);
+  border-color: var(--theme-border);
+  color: var(--theme-text);
+}
+html .glass-card { box-shadow: 0 8px 24px rgba(15, 37, 62, .06); }
+html :is(.text-on-background, .text-on-surface, .text-slate-700, .text-slate-800, .text-slate-900) {
+  color: var(--theme-text);
+}
+html :is(.text-on-surface-variant, .text-slate-300, .text-slate-400, .text-slate-500, .text-slate-600) {
+  color: var(--theme-muted);
+}
+html :is([class~="text-[#099999]"], .text-secondary) { color: var(--theme-accent); }
+html .text-primary { color: var(--theme-heading); }
+html :is(.bg-teal-50, .bg-blue-50, .demo-badge) { background-color: var(--theme-accent-soft); }
+html .demo-badge { color: var(--theme-accent); border-color: var(--theme-border); }
+html .bg-slate-100 { background-color: var(--theme-subtle); }
+html :is(.border-slate-200, .border-slate-100) { border-color: var(--theme-border); }
+html .nav-item { color: var(--theme-muted); }
+html .nav-item:is(:hover, .nav-active) { color: var(--theme-accent); background: var(--theme-accent-soft); }
+html .filter-btn { background: var(--theme-surface); border-color: var(--theme-border); color: var(--theme-muted); }
+html .filter-btn:hover { background: var(--theme-accent-soft); color: var(--theme-accent); border-color: var(--theme-accent); }
+html .filter-btn.active, html [class~="bg-[#099999]"].text-white {
+  background: var(--theme-control);
+  border-color: var(--theme-control);
+  color: #fff;
+}
+html :is(button, .filter-btn.active)[class~="bg-[#099999]"].text-white:hover,
+html .filter-btn.active:hover { background: var(--theme-control-hover); }
+html.dark :is([class~="hover:bg-slate-50"], [class~="hover:bg-slate-100"], [class~="hover:bg-slate-200"], [class~="hover:bg-blue-50"], [class~="hover:bg-white"]):hover {
+  background-color: var(--theme-subtle);
+}
+html button:is(.bg-primary, [class~="bg-[#099999]"]):is(:hover, :focus-visible) { opacity: 1; }
+html .search-result-item:hover, html #notif-list button:hover { background: var(--theme-subtle); }
+html .period-panel { color: var(--theme-text); }
+html .period-panel.text-white { color: #fff; }
+html .risk-marker { color: var(--theme-warning); }
+html .text-white .risk-marker { color: #ffdf99; }
+html .chart-track { background-color: var(--theme-chart-track); }
+html .chart-fill { background-color: var(--theme-accent); }
+html .chart-core { background-color: var(--theme-surface); }
+html .chart-forecast-dot { fill: var(--theme-surface); }
+html .laboratory-overlay { background: linear-gradient(90deg, #092b35 0%, #092b35f5 55%, #092b3550 100%); }
+html .laboratory-overlay p { color: #eef4fb; }
+html :is(button, a, input, textarea):focus-visible { outline-color: var(--theme-accent); }
+@media (max-width: 767px) {
+  html.dark #sidebar { background-color: var(--theme-surface); }
+}
+@media print {
+  html.dark {
+    color-scheme: light;
+    --theme-page: #fff;
+    --theme-surface: #fff;
+    --theme-subtle: #edf2f7;
+    --theme-text: #172631;
+    --theme-muted: #475569;
+    --theme-accent: #076b6b;
+    --theme-heading: #003577;
+    --theme-accent-soft: #e3f4f2;
+    --theme-border: #c1ceda;
+    --theme-chart-track: #d5e0e9;
+    --theme-chart-secondary: #405a85;
+    --theme-warning: #92400e;
+  }
+  html .text-white .risk-marker { color: var(--theme-warning); }
+}
+
+</style>
+</head>
+
+<body class="">
+<div class="flex min-h-screen" id="app-root">
+
+<!-- ════════════ SIDEBAR ════════════ -->
+<aside id="sidebar">
+
+  <!-- Logo -->
+<div class="logo-area flex items-center px-5 py-5 mb-2 justify-between">
+    <img src="https://www.dadgroup.com/wp-content/uploads/2023/11/uplift-dad-website-05.png" alt="Dar Aldawa Logo" class="w-40 h-auto object-contain flex-shrink-0">
+    <button id="collapse-btn" class="ml-auto p-1.5 rounded-lg hover:bg-slate-100 text-slate-400 flex-shrink-0" onclick="toggleSidebar()" title="Collapse sidebar" type="button">
+      <span class="material-symbols-outlined" style="font-size:18px">chevron_left</span>
+    </button>
+  </div>
+  <!-- Nav -->
+  <nav class="flex-1 overflow-y-auto overflow-x-hidden px-0 py-1">
+    
+    <button class="nav-item nav-active" onclick="showSection('marketing')" id="nav-marketing" data-label="Marketing &amp; Sales" type="button" aria-label="Marketing" title="Marketing" aria-current="page">
+      <span class="material-symbols-outlined nav-icon">campaign</span>
+      <span class="nav-label">Marketing</span>
+    </button>
+    <button class="nav-item " onclick="showSection('gm')" id="nav-gm" data-label="GM Office" type="button" aria-label="GM Office" title="GM Office">
+      <span class="material-symbols-outlined nav-icon">business_center</span>
+      <span class="nav-label">GM Office</span>
+    </button>
+    <button class="nav-item " onclick="showSection('operations')" id="nav-operations" data-label="Operations" type="button" aria-label="Operations" title="Operations">
+      <span class="material-symbols-outlined nav-icon">precision_manufacturing</span>
+      <span class="nav-label">Operations</span>
+    </button>
+    <button class="nav-item " onclick="showSection('finance')" id="nav-finance" data-label="Finance" type="button" aria-label="Finance" title="Finance">
+      <span class="material-symbols-outlined nav-icon">payments</span>
+      <span class="nav-label">Finance</span>
+    </button>
+    <button class="nav-item " onclick="showSection('hr')" id="nav-hr" data-label="HR" type="button" aria-label="HR" title="HR">
+      <span class="material-symbols-outlined nav-icon">groups_3</span>
+      <span class="nav-label">HR</span>
+    </button>
+    <button class="nav-item " onclick="showSection('quality_ops')" id="nav-quality_ops" data-label="Quality Ops" type="button" aria-label="Quality Ops" title="Quality Ops">
+      <span class="material-symbols-outlined nav-icon">fact_check</span>
+      <span class="nav-label">Quality Ops</span>
+    </button>
+    <button class="nav-item " onclick="showSection('scientific')" id="nav-scientific" data-label="Scientific" type="button" aria-label="Scientific" title="Scientific">
+      <span class="material-symbols-outlined nav-icon">science</span>
+      <span class="nav-label">Scientific</span>
+    </button>
+    <button class="nav-item " onclick="showSection('quality_comp')" id="nav-quality_comp" data-label="Quality Compliance" type="button" aria-label="Quality Compliance" title="Quality Compliance">
+      <span class="material-symbols-outlined nav-icon">verified_user</span>
+      <span class="nav-label">Quality Compliance</span>
+    </button>
+    <button class="nav-item " onclick="showSection('bd')" id="nav-bd" data-label="BD &amp; Licenses" type="button" aria-label="BD &amp; Licenses" title="BD &amp; Licenses">
+      <span class="material-symbols-outlined nav-icon">handshake</span>
+      <span class="nav-label">BD &amp; Licenses</span>
+    </button>
+    <button class="nav-item " onclick="showSection('it')" id="nav-it" data-label="IT" type="button" aria-label="IT" title="IT">
+      <span class="material-symbols-outlined nav-icon">terminal</span>
+      <span class="nav-label">IT</span>
+    </button>
+  </nav>
+
+  <!-- Bottom -->
+  <div class="border-t  px-2 py-3 space-y-1">
+    <button class="nav-item" data-action="support" type="button" aria-label="Support" title="Support">
+      <span class="material-symbols-outlined nav-icon">help_center</span>
+      <span class="nav-label sidebar-bottom-label">Support</span>
+    </button>
+    <button class="nav-item" data-action="status" type="button" aria-label="System Status" title="System Status">
+      <span class="material-symbols-outlined nav-icon">analytics</span>
+      <span class="nav-label sidebar-bottom-label">System Status</span>
+    </button>
+  </div>
+
+</aside>
+
+<button type="button" id="nav-scrim" aria-label="Close navigation" onclick="toggleMobileMenu(false)" tabindex="-1"></button><!-- ════════════ MAIN ════════════ -->
+<div class="flex-1 flex flex-col min-w-0">
+
+  <!-- Top Bar -->
+  <header id="topbar">
+    <div class="flex items-center gap-4">
+      <button id="mobile-menu" type="button" onclick="toggleMobileMenu()" aria-label="Open navigation" aria-controls="sidebar" aria-expanded="false"><span class="material-symbols-outlined" aria-hidden="true">menu</span></button><div>
+        <h1 id="section-title" class="text-sm font-bold text-[#099999] font-headline-md leading-none">Marketing &amp; Sales</h1>
+        <p class="text-[10px] text-slate-400 font-label-md mt-0.5">Dar Aldawa · Executive Dashboard</p>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <span class="inline-flex shrink-0 items-center rounded-full border border-teal-200 bg-teal-50 px-2.5 py-1 text-xs font-semibold text-teal-800 dark:border-teal-700 dark:bg-teal-950 dark:text-teal-200 demo-badge">Demo Data</span>
+
+      <!-- Search -->
+      <button onclick="openSearch()" class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100 hover:bg-slate-200 transition-colors" type="button" aria-label="Search">
+        <span class="material-symbols-outlined text-slate-400" style="font-size:18px">search</span>
+        <span class="text-xs text-slate-400 hidden md:block">Quick search...</span>
+        <kbd class="hidden md:block text-[10px] text-slate-300 font-bold">⌘K</kbd>
+      </button>
+
+      <!-- Dark mode -->
+      <button onclick="toggleDark()" id="dark-btn" class="p-2 rounded-full hover:bg-slate-100 text-slate-500 transition-colors" title="Toggle dark mode" type="button" aria-label="Toggle dark mode">
+        <span class="material-symbols-outlined" style="font-size:20px" id="dark-icon">dark_mode</span>
+      </button>
+
+      <!-- Notifications -->
+      <button onclick="toggleNotif()" class="relative p-2 rounded-full hover:bg-slate-100 text-slate-500 transition-colors" type="button" aria-label="Notifications" aria-controls="notif-panel" aria-expanded="false">
+        <span class="material-symbols-outlined" style="font-size:20px">notifications</span>
+        <span id="notif-badge" class="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+      </button>
+
+      <!-- Avatar -->
+      <div class="flex items-center gap-2 pl-2 border-l ">
+        <div class="w-8 h-8 rounded-full bg-[#099999] flex items-center justify-center text-white text-xs font-bold ring-2 ring-white shadow">GM</div>
+        <div class="hidden md:block">
+          <p class="text-xs font-bold text-slate-700 leading-none">Gen. Manager</p>
+          <p class="text-[10px] text-slate-400">MENA Region</p>
+        </div>
+      </div>
+
+      <!-- Export -->
+      <button class="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#099999] text-white text-xs font-semibold hover:bg-[#163d80] transition-colors shadow-md shadow-blue-900/20" data-action="report" type="button">
+        <span class="material-symbols-outlined" style="font-size:15px">file_download</span>
+        Export
+      </button>
+    </div>
+  </header>
+
+  <!-- Filter Bar -->
+  <div id="filter-bar">
+    <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Period:</span>
+    <button class="filter-btn" onclick="setFilter('Q1')" data-period="Q1" aria-pressed="false" type="button">Q1 2026</button>
+    <button class="filter-btn" onclick="setFilter('Q2')" data-period="Q2" aria-pressed="false" type="button">Q2 2026</button>
+    <button class="filter-btn active" onclick="setFilter('Q3')" data-period="Q3" aria-pressed="true" title="Q3 2026 demo reporting period" type="button">Q3 2026</button>
+    <button class="filter-btn" onclick="setFilter('Q4')" data-period="Q4" aria-pressed="false" type="button">Q4 2026 Forecast</button>
+    <button class="filter-btn" onclick="setFilter('YTD')" data-period="YTD" aria-pressed="false" type="button">YTD 2026</button>
+  <span id="period-context" class="ml-auto text-xs text-slate-500 font-medium" role="status"></span></div>
+
+  <!-- Content area with skeleton -->
+  <div class="flex-1 overflow-y-auto relative" id="content-area">
+
+    <!-- Skeleton Overlay -->
+    <div id="skeleton-overlay" class="hidden">
+      <div class="grid grid-cols-4 gap-4">
+        <div class="skeleton h-28 rounded-xl"></div>
+        <div class="skeleton h-28 rounded-xl"></div>
+        <div class="skeleton h-28 rounded-xl"></div>
+        <div class="skeleton h-28 rounded-xl"></div>
+      </div>
+      <div class="grid grid-cols-3 gap-4">
+        <div class="skeleton h-56 rounded-xl col-span-2"></div>
+        <div class="skeleton h-56 rounded-xl"></div>
+      </div>
+      <div class="grid grid-cols-3 gap-4">
+        <div class="skeleton min-h-40 rounded-xl"></div>
+        <div class="skeleton min-h-40 rounded-xl"></div>
+        <div class="skeleton min-h-40 rounded-xl"></div>
+      </div>
+    </div>
+
+    <!-- Dashboard Sections -->
+    
+    <div id="section-marketing" class="section-content" style="display:block" data-section="marketing">
+      <!-- Dashboard Content -->
+<div class="p-8 max-w-[1600px] mx-auto w-full space-y-8">
+<!-- Hero Section -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+<div>
+<h1 class="text-headline-xl font-headline-xl text-on-background">Marketing &amp; Sales Dashboard</h1>
+<p class="text-body-lg text-on-surface-variant max-w-2xl mt-2">Tracking global market penetration and sales growth across therapeutic classes.</p>
+</div>
+<div class="flex space-x-3">
+<button class="px-4 py-2 border border-[#099999] text-[#099999] rounded-lg font-medium hover:bg-blue-50 transition-colors flex items-center" data-action="report" type="button">
+<span class="material-symbols-outlined mr-2 text-[20px]" data-icon="file_download">file_download</span>
+                            Export Report
+                        </button>
+<button class="px-4 py-2 bg-primary text-on-primary rounded-lg font-medium shadow-lg shadow-primary/20 hover:opacity-90 transition-opacity flex items-center" data-action="strategy" type="button">
+<span class="material-symbols-outlined mr-2 text-[20px]" data-icon="add_chart">add_chart</span>
+                            New Strategy
+                        </button>
+</div>
+</div>
+<!-- KPI Bento Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+<div class="glass-panel p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow" data-period-kpi="0"><span class="material-symbols-outlined text-[#099999] bg-teal-50 rounded-lg p-2 mb-3 self-start" aria-hidden="true">monetization_on</span><p class="period-kpi-label text-label-md text-slate-500"></p><p class="period-kpi-value text-display-lg font-display-lg text-[#099999] mt-1"></p><p class="period-kpi-context text-xs text-slate-500 mt-2"></p></div>
+<div class="glass-panel p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow" data-period-kpi="1"><span class="material-symbols-outlined text-[#099999] bg-teal-50 rounded-lg p-2 mb-3 self-start" aria-hidden="true">pie_chart</span><p class="period-kpi-label text-label-md text-slate-500"></p><p class="period-kpi-value text-display-lg font-display-lg text-[#099999] mt-1"></p><p class="period-kpi-context text-xs text-slate-500 mt-2"></p></div>
+<div class="glass-panel p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow" data-period-kpi="2"><span class="material-symbols-outlined text-[#099999] bg-teal-50 rounded-lg p-2 mb-3 self-start" aria-hidden="true">group_add</span><p class="period-kpi-label text-label-md text-slate-500"></p><p class="period-kpi-value text-display-lg font-display-lg text-[#099999] mt-1"></p><p class="period-kpi-context text-xs text-slate-500 mt-2"></p></div>
+<div class="glass-panel p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow" data-period-kpi="3"><span class="material-symbols-outlined text-[#099999] bg-teal-50 rounded-lg p-2 mb-3 self-start" aria-hidden="true">show_chart</span><p class="period-kpi-label text-label-md text-slate-500"></p><p class="period-kpi-value text-display-lg font-display-lg text-[#099999] mt-1"></p><p class="period-kpi-context text-xs text-slate-500 mt-2"></p></div>
+</div>
+<!-- Visualization Layer -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+<!-- Sales Trend Line Chart Mockup -->
+<div class="lg:col-span-2 glass-panel p-8 rounded-2xl period-panel p-5 md:p-6" data-period-panel="trend" data-config="0"><h3 class="text-headline-md font-headline-md mb-3">Sales Trend Analysis</h3><div class="period-panel-body"></div></div>
+<!-- Market Share Donut Chart Mockup -->
+<div class="glass-panel p-8 rounded-2xl flex flex-col period-panel p-5 md:p-6" data-period-panel="share" data-config="1"><h3 class="text-headline-md font-headline-md mb-3">Market Breakdown</h3><div class="period-panel-body"></div></div>
+</div>
+<!-- Insights & Risks Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+<!-- Executive Insights -->
+<div class="glass-panel p-8 rounded-2xl period-panel p-5 md:p-6" data-period-panel="brief" data-config=""><h3 class="text-headline-md font-headline-md mb-3">Executive Insights</h3><div class="period-panel-body"></div></div>
+<!-- Alerts & Risks -->
+<div class="glass-panel p-8 rounded-2xl period-panel p-5 md:p-6" data-period-panel="risk" data-config=""><h3 class="text-headline-md font-headline-md mb-3">Alerts / Risks</h3><div class="period-panel-body"></div></div>
+</div>
+<!-- Regional Comparison Section -->
+<div class="glass-panel p-8 rounded-2xl period-panel p-5 md:p-6" data-period-panel="dist" data-config="0|GCC|North Africa|Levant|Other Markets"><h3 class="text-headline-md font-headline-md mb-3">Regional Sales Comparison</h3><div class="period-panel-body"></div></div>
+</div>
+<!-- Dashboard Footer -->
+    </div>
+    <div id="section-gm" class="section-content" style="display:none" data-section="gm">
+      <!-- Dashboard Content -->
+<div class="flex-1 overflow-y-auto p-margin max-w-[1600px] mx-auto w-full space-y-gutter">
+<!-- Hero Header -->
+<section class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-4">
+<div class="max-w-2xl">
+<h1 class="text-display-lg font-display-lg text-primary mb-2">GM Office Dashboard</h1>
+<p class="text-body-lg font-body-lg text-on-surface-variant">Strategic overview of organizational performance and key milestone tracking across the pharmaceutical value chain.</p>
+</div>
+<div class="flex gap-3">
+<span class="px-6 py-2 bg-white border  rounded-lg font-label-bold text-primary flex items-center gap-2 hover:bg-slate-50 transition-all shadow-sm"><span class="material-symbols-outlined text-lg" data-icon="calendar_today">calendar_today</span><span data-period-label=""></span></span>
+<button class="px-6 py-2 bg-primary text-white rounded-lg font-label-bold flex items-center gap-2 hover:opacity-90 transition-all shadow-md" data-action="report" type="button">
+<span class="material-symbols-outlined text-lg" data-icon="ios_share">ios_share</span>
+                            Export Insights
+                        </button>
+</div>
+</section>
+<!-- KPI Bento Grid -->
+<section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-gutter">
+<!-- KPI Card 1 -->
+<div class="bg-white p-md rounded-xl shadow-sm border  flex flex-col justify-between hover:shadow-md transition-shadow" data-period-kpi="0"><span class="material-symbols-outlined text-[#099999] bg-teal-50 rounded-lg p-2 mb-3 self-start" aria-hidden="true">ads_click</span><p class="period-kpi-label text-label-md text-slate-500"></p><p class="period-kpi-value text-display-lg font-display-lg text-[#099999] mt-1"></p><p class="period-kpi-context text-xs text-slate-500 mt-2"></p></div>
+<!-- KPI Card 2 -->
+<div class="bg-white p-md rounded-xl shadow-sm border  flex flex-col justify-between hover:shadow-md transition-shadow" data-period-kpi="1"><span class="material-symbols-outlined text-[#099999] bg-teal-50 rounded-lg p-2 mb-3 self-start" aria-hidden="true">speed</span><p class="period-kpi-label text-label-md text-slate-500"></p><p class="period-kpi-value text-display-lg font-display-lg text-[#099999] mt-1"></p><p class="period-kpi-context text-xs text-slate-500 mt-2"></p></div>
+<!-- KPI Card 3 -->
+<div class="bg-white p-md rounded-xl shadow-sm border  flex flex-col justify-between hover:shadow-md transition-shadow" data-period-kpi="2"><span class="material-symbols-outlined text-[#099999] bg-teal-50 rounded-lg p-2 mb-3 self-start" aria-hidden="true">rocket_launch</span><p class="period-kpi-label text-label-md text-slate-500"></p><p class="period-kpi-value text-display-lg font-display-lg text-[#099999] mt-1"></p><p class="period-kpi-context text-xs text-slate-500 mt-2"></p></div>
+<!-- KPI Card 4 -->
+<div class="bg-white p-md rounded-xl shadow-sm border  flex flex-col justify-between hover:shadow-md transition-shadow" data-period-kpi="3"><span class="material-symbols-outlined text-[#099999] bg-teal-50 rounded-lg p-2 mb-3 self-start" aria-hidden="true">account_balance_wallet</span><p class="period-kpi-label text-label-md text-slate-500"></p><p class="period-kpi-value text-display-lg font-display-lg text-[#099999] mt-1"></p><p class="period-kpi-context text-xs text-slate-500 mt-2"></p></div>
+</section>
+<!-- Visualization & Insights -->
+<section class="grid grid-cols-1 lg:grid-cols-3 gap-gutter">
+<!-- Milestone Timeline -->
+<div class="lg:col-span-2 bg-white rounded-xl shadow-sm border  overflow-hidden period-panel p-5 md:p-6" data-period-panel="milestones" data-config=""><h3 class="text-headline-md font-headline-md mb-3">Milestone Timeline</h3><div class="period-panel-body"></div></div>
+<!-- Alerts / Risks Panel -->
+<div class="bg-[#099999] text-white rounded-xl shadow-lg border border-[#099999] overflow-hidden flex flex-col period-panel p-5 md:p-6" data-period-panel="risk" data-config=""><h3 class="text-headline-md font-headline-md mb-3">Alerts &amp; Risks</h3><div class="period-panel-body"></div></div>
+</section>
+<!-- Resource & Strategy Grid -->
+<section class="grid grid-cols-1 lg:grid-cols-2 gap-gutter">
+<!-- Resource Allocation -->
+<div class="bg-white rounded-xl shadow-sm border  p-md period-panel p-5 md:p-6" data-period-panel="dist" data-config="3|Clinical|Manufacturing|Regulatory|Technology"><h3 class="text-headline-md font-headline-md mb-3">Resource Allocation</h3><div class="period-panel-body"></div></div>
+<!-- Strategic Pillar Distribution -->
+<div class="bg-white rounded-xl shadow-sm border  p-md relative overflow-hidden period-panel p-5 md:p-6" data-period-panel="dist" data-config="2|Growth|Operations|Quality|Innovation"><h3 class="text-headline-md font-headline-md mb-3">Strategic Pillar Distribution</h3><div class="period-panel-body"></div></div>
+</section>
+<!-- Executive Insights -->
+<section class="glass-panel rounded-2xl p-xl flex flex-col md:flex-row items-center gap-xl mb-xl period-panel p-5 md:p-6" data-period-panel="brief" data-config=""><h3 class="text-headline-md font-headline-md mb-3">Strategic Summary</h3><div class="period-panel-body"></div></section>
+</div>
+    </div>
+    <div id="section-operations" class="section-content" style="display:none" data-section="operations">
+      <!-- Dashboard Content -->
+<div class="flex-1 overflow-y-auto p-8 space-y-8 max-w-[1600px] mx-auto w-full">
+<!-- Hero Executive Summary -->
+<section class="grid grid-cols-1 md:grid-cols-3 gap-gutter">
+<div class="md:col-span-2 glass-panel p-8 rounded-xl soft-shadow relative overflow-hidden flex flex-col justify-center min-h-[160px]">
+<div class="absolute top-0 right-0 p-8 opacity-10">
+<span class="material-symbols-outlined text-[120px]" data-icon="query_stats">query_stats</span>
+</div>
+<div class="relative z-10">
+<h2 class="text-headline-xl font-headline-xl text-[#099999] mb-2">Executive Summary</h2>
+<p class="text-body-lg font-body-lg text-on-surface-variant max-w-2xl">
+                                Manufacturing performance and supply chain efficiency across facilities.
+                            </p>
+</div>
+</div>
+<div class="bg-primary p-8 rounded-xl ambient-shadow text-white flex flex-col justify-between">
+<div>
+<p class="font-label-bold text-[10px] uppercase tracking-widest text-primary-fixed opacity-80">Global Status</p>
+<h3 class="text-headline-md font-headline-md mt-1">Equipment Effectiveness</h3>
+</div>
+<div class="flex items-end gap-2">
+<span class="text-display-lg font-display-lg" data-period-summary="3"></span>
+</div>
+</div>
+</section>
+<!-- KPI Cards Grid -->
+<section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-gutter">
+<!-- Card 1: Production Yield -->
+<div class="bg-white p-6 rounded-xl soft-shadow flex flex-col justify-between border border-white" data-period-kpi="0"><span class="material-symbols-outlined text-[#099999] bg-teal-50 rounded-lg p-2 mb-3 self-start" aria-hidden="true">precision_manufacturing</span><p class="period-kpi-label text-label-md text-slate-500"></p><p class="period-kpi-value text-display-lg font-display-lg text-[#099999] mt-1"></p><p class="period-kpi-context text-xs text-slate-500 mt-2"></p></div>
+<!-- Card 2: Supply Chain Lead Time -->
+<div class="bg-white p-6 rounded-xl soft-shadow flex flex-col justify-between border border-white" data-period-kpi="1"><span class="material-symbols-outlined text-[#099999] bg-teal-50 rounded-lg p-2 mb-3 self-start" aria-hidden="true">local_shipping</span><p class="period-kpi-label text-label-md text-slate-500"></p><p class="period-kpi-value text-display-lg font-display-lg text-[#099999] mt-1"></p><p class="period-kpi-context text-xs text-slate-500 mt-2"></p></div>
+<!-- Card 3: Inventory Turnover -->
+<div class="bg-white p-6 rounded-xl soft-shadow flex flex-col justify-between border border-white" data-period-kpi="2"><span class="material-symbols-outlined text-[#099999] bg-teal-50 rounded-lg p-2 mb-3 self-start" aria-hidden="true">inventory_2</span><p class="period-kpi-label text-label-md text-slate-500"></p><p class="period-kpi-value text-display-lg font-display-lg text-[#099999] mt-1"></p><p class="period-kpi-context text-xs text-slate-500 mt-2"></p></div>
+<!-- Card 4: OEE -->
+<div class="bg-white p-6 rounded-xl soft-shadow flex flex-col justify-between border border-white" data-period-kpi="3"><span class="material-symbols-outlined text-[#099999] bg-teal-50 rounded-lg p-2 mb-3 self-start" aria-hidden="true">settings_suggest</span><p class="period-kpi-label text-label-md text-slate-500"></p><p class="period-kpi-value text-display-lg font-display-lg text-[#099999] mt-1"></p><p class="period-kpi-context text-xs text-slate-500 mt-2"></p></div>
+</section>
+<!-- Charts & Insights Bento Grid -->
+<section class="grid grid-cols-1 lg:grid-cols-3 gap-gutter">
+<!-- Production Output Trend -->
+<div class="lg:col-span-2 glass-panel p-8 rounded-xl soft-shadow period-panel p-5 md:p-6" data-period-panel="trend" data-config="0"><h3 class="text-headline-md font-headline-md mb-3">Production Yield Trend</h3><div class="period-panel-body"></div></div>
+<!-- Executive Insights -->
+<div class="bg-white p-8 rounded-xl soft-shadow border  flex flex-col period-panel p-5 md:p-6" data-period-panel="brief" data-config=""><h3 class="text-headline-md font-headline-md mb-3">Executive Insights</h3><div class="period-panel-body"></div></div>
+<!-- Lead Time Comparison & Inventory Distribution -->
+<div class="bg-white p-8 rounded-xl soft-shadow border  period-panel p-5 md:p-6" data-period-panel="trend" data-config="1"><h3 class="text-headline-md font-headline-md mb-3">Lead Time Trend</h3><div class="period-panel-body"></div></div>
+<!-- Alerts / Risks Panel -->
+<div class="lg:col-span-2 glass-panel p-8 rounded-xl soft-shadow period-panel p-5 md:p-6" data-period-panel="risk" data-config=""><h3 class="text-headline-md font-headline-md mb-3">Active Alerts &amp; Risks</h3><div class="period-panel-body"></div></div>
+</section>
+</div>
+<!-- Bottom Controls (Conditional FAB suppressed per rules for Dashboard) -->
+    </div>
+    <div id="section-finance" class="section-content" style="display:none" data-section="finance">
+      <!-- Scrollable Content -->
+<div class="flex-1 overflow-y-auto p-margin custom-scrollbar bg-[#F4F6F6]">
+<div class="max-w-[1600px] mx-auto space-y-gutter">
+<!-- KPI Hero Section -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-gutter">
+<!-- KPI Card 1 -->
+<div class="glass-panel p-md rounded-2xl shadow-sm hover:shadow-md transition-shadow" data-period-kpi="0"><span class="material-symbols-outlined text-[#099999] bg-teal-50 rounded-lg p-2 mb-3 self-start" aria-hidden="true">account_balance_wallet</span><p class="period-kpi-label text-label-md text-slate-500"></p><p class="period-kpi-value text-display-lg font-display-lg text-[#099999] mt-1"></p><p class="period-kpi-context text-xs text-slate-500 mt-2"></p></div>
+<!-- KPI Card 2 -->
+<div class="glass-panel p-md rounded-2xl shadow-sm hover:shadow-md transition-shadow" data-period-kpi="1"><span class="material-symbols-outlined text-[#099999] bg-teal-50 rounded-lg p-2 mb-3 self-start" aria-hidden="true">equalizer</span><p class="period-kpi-label text-label-md text-slate-500"></p><p class="period-kpi-value text-display-lg font-display-lg text-[#099999] mt-1"></p><p class="period-kpi-context text-xs text-slate-500 mt-2"></p></div>
+<!-- KPI Card 3 -->
+<div class="glass-panel p-md rounded-2xl shadow-sm hover:shadow-md transition-shadow" data-period-kpi="2"><span class="material-symbols-outlined text-[#099999] bg-teal-50 rounded-lg p-2 mb-3 self-start" aria-hidden="true">payments</span><p class="period-kpi-label text-label-md text-slate-500"></p><p class="period-kpi-value text-display-lg font-display-lg text-[#099999] mt-1"></p><p class="period-kpi-context text-xs text-slate-500 mt-2"></p></div>
+<!-- KPI Card 4 -->
+<div class="glass-panel p-md rounded-2xl shadow-sm hover:shadow-md transition-shadow" data-period-kpi="3"><span class="material-symbols-outlined text-[#099999] bg-teal-50 rounded-lg p-2 mb-3 self-start" aria-hidden="true">analytics</span><p class="period-kpi-label text-label-md text-slate-500"></p><p class="period-kpi-value text-display-lg font-display-lg text-[#099999] mt-1"></p><p class="period-kpi-context text-xs text-slate-500 mt-2"></p></div>
+</div>
+<!-- Bento Grid Content -->
+<div class="grid grid-cols-12 gap-gutter">
+<!-- Revenue vs Expenses Trend Chart (Main Center) -->
+<div class="col-span-12 lg:col-span-8 glass-panel rounded-2xl p-md shadow-sm period-panel p-5 md:p-6" data-period-panel="finance" data-config=""><h3 class="text-headline-md font-headline-md mb-3">Revenue vs Expenses Trend</h3><div class="period-panel-body"></div></div>
+<!-- Alerts / Risks Panel -->
+<div class="col-span-12 lg:col-span-4 glass-panel rounded-2xl p-md shadow-sm period-panel p-5 md:p-6" data-period-panel="risk" data-config=""><h3 class="text-headline-md font-headline-md mb-3">Alerts &amp; Risks</h3><div class="period-panel-body"></div></div>
+<!-- Departmental Spend Bar Chart -->
+<div class="col-span-12 lg:col-span-6 glass-panel rounded-2xl p-md shadow-sm period-panel p-5 md:p-6" data-period-panel="dist" data-config="expenses|Operations|Commercial|R&amp;D|Administration"><h3 class="text-headline-md font-headline-md mb-3">Departmental Spend</h3><div class="period-panel-body"></div></div>
+<!-- Cost Distribution Donut Chart -->
+<div class="col-span-12 lg:col-span-6 glass-panel rounded-2xl p-md shadow-sm period-panel p-5 md:p-6" data-period-panel="dist" data-config="expenses|Payroll|Materials|Logistics|Other"><h3 class="text-headline-md font-headline-md mb-3">Cost Distribution</h3><div class="period-panel-body"></div></div>
+<!-- Executive Insights Panel (Full Width) -->
+<div class="col-span-12 glass-panel rounded-2xl p-md shadow-sm period-panel p-5 md:p-6" data-period-panel="brief" data-config=""><h3 class="text-headline-md font-headline-md mb-3">Executive Insights</h3><div class="period-panel-body"></div></div>
+</div>
+</div>
+</div>
+    </div>
+<div id="section-hr" class="section-content" style="display:none" data-section="hr">
+      <!-- Dashboard Content Container Added -->
+      <div class="p-8 max-w-[1600px] mx-auto w-full space-y-8">
+        <section class="mb-8">
+          <div class="flex items-end justify-between mb-6">
+            <div>
+              <p class="text-slate-500 font-label-bold uppercase tracking-widest mb-1">Portfolio Summary</p>
+              <h2 class="text-headline-xl font-headline-xl text-on-surface">Human Capital Overview</h2>
+            </div>
+            <div class="flex gap-2">
+              <span class="px-4 py-2 glass-panel rounded-lg text-sm font-medium flex items-center gap-2 hover:bg-white transition-all shadow-sm"><span class="material-symbols-outlined text-sm" data-icon="calendar_today">calendar_today</span><span data-period-label=""></span></span>
+              <button class="px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium flex items-center gap-2 hover:opacity-90 transition-all shadow-md" data-action="report" type="button">
+                <span class="material-symbols-outlined text-sm" data-icon="download">download</span>
+                Export Report
+              </button>
+            </div>
+          </div>
+          <!-- KPI Cards Grid -->
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <!-- Headcount -->
+            <div class="glass-panel p-6 rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col justify-between min-h-40" data-period-kpi="0"><span class="material-symbols-outlined text-[#099999] bg-teal-50 rounded-lg p-2 mb-3 self-start" aria-hidden="true">person</span><p class="period-kpi-label text-label-md text-slate-500"></p><p class="period-kpi-value text-display-lg font-display-lg text-[#099999] mt-1"></p><p class="period-kpi-context text-xs text-slate-500 mt-2"></p></div>
+            <!-- Retention Rate -->
+            <div class="glass-panel p-6 rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col justify-between min-h-40" data-period-kpi="1"><span class="material-symbols-outlined text-[#099999] bg-teal-50 rounded-lg p-2 mb-3 self-start" aria-hidden="true">verified</span><p class="period-kpi-label text-label-md text-slate-500"></p><p class="period-kpi-value text-display-lg font-display-lg text-[#099999] mt-1"></p><p class="period-kpi-context text-xs text-slate-500 mt-2"></p></div>
+            <!-- Training Completion -->
+            <div class="glass-panel p-6 rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col justify-between min-h-40" data-period-kpi="2"><span class="material-symbols-outlined text-[#099999] bg-teal-50 rounded-lg p-2 mb-3 self-start" aria-hidden="true">school</span><p class="period-kpi-label text-label-md text-slate-500"></p><p class="period-kpi-value text-display-lg font-display-lg text-[#099999] mt-1"></p><p class="period-kpi-context text-xs text-slate-500 mt-2"></p></div>
+            <!-- Internal Mobility -->
+            <div class="glass-panel p-6 rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col justify-between min-h-40" data-period-kpi="3"><span class="material-symbols-outlined text-[#099999] bg-teal-50 rounded-lg p-2 mb-3 self-start" aria-hidden="true">moving</span><p class="period-kpi-label text-label-md text-slate-500"></p><p class="period-kpi-value text-display-lg font-display-lg text-[#099999] mt-1"></p><p class="period-kpi-context text-xs text-slate-500 mt-2"></p></div>
+          </div>
+        </section>
+        <!-- Bento Grid Section -->
+        <div class="grid grid-cols-12 gap-6 mb-8">
+          <!-- Retention Trend Chart -->
+          <div class="col-span-12 lg:col-span-8 glass-panel rounded-3xl p-8 shadow-sm flex flex-col period-panel p-5 md:p-6" data-period-panel="trend" data-config="1"><h3 class="text-headline-md font-headline-md mb-3">Retention Trend</h3><div class="period-panel-body"></div></div>
+          <!-- Executive Insights Panel -->
+          <div class="col-span-12 lg:col-span-4 flex flex-col gap-6 period-panel p-5 md:p-6" data-period-panel="brief" data-config=""><h3 class="text-headline-md font-headline-md mb-3">Executive Insights</h3><div class="period-panel-body"></div></div>
+        </div>
+        <!-- Lower Grid Section -->
+        <div class="grid grid-cols-12 gap-6">
+          <!-- Departmental Satisfaction Chart -->
+          <div class="col-span-12 lg:col-span-5 glass-panel rounded-3xl p-8 shadow-sm period-panel p-5 md:p-6" data-period-panel="trend" data-config="2"><h3 class="text-headline-md font-headline-md mb-3">Training Completion Trend</h3><div class="period-panel-body"></div></div>
+          <!-- Alerts & Risks -->
+          <div class="col-span-12 lg:col-span-7 glass-panel rounded-3xl p-8 shadow-sm period-panel p-5 md:p-6" data-period-panel="risk" data-config=""><h3 class="text-headline-md font-headline-md mb-3">Alerts / Cultural Risks</h3><div class="period-panel-body"></div></div>
+        </div>
+      </div>
+    </div>
+<div id="section-quality_ops" class="section-content" style="display:none" data-section="quality_ops">
+      <!-- Dashboard Content Container Added -->
+      <div class="p-8 max-w-[1600px] mx-auto w-full space-y-8">
+        <!-- Summary Header -->
+        <section class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div>
+            <h2 class="text-headline-xl font-headline-xl text-[#099999]">Quality Performance Overview</h2>
+            <p class="text-body-lg text-on-surface-variant max-w-2xl">Monitoring manufacturing quality standards, batch release efficiency, and facility audits by reporting period.</p>
+          </div>
+          <div class="flex gap-3">
+            <button class="px-6 py-2 bg-[#099999] text-white rounded-lg flex items-center gap-2 font-label-bold hover:opacity-90 transition-all" data-action="report" type="button">
+              <span class="material-symbols-outlined text-[18px]" data-icon="add">add</span> Generate Report
+            </button>
+            <button class="px-6 py-2 border border-[#099999] text-[#099999] rounded-lg flex items-center gap-2 font-label-bold hover:bg-blue-50 transition-all" data-action="csv" type="button">
+              <span class="material-symbols-outlined text-[18px]" data-icon="download">download</span> Export CSV
+            </button>
+          </div>
+        </section>
+        <!-- KPI Cards Grid -->
+        <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <!-- Batch Pass Rate -->
+          <div class="glass-card p-6 rounded-[16px] flex flex-col justify-between min-h-40 group" data-period-kpi="0"><span class="material-symbols-outlined text-[#099999] bg-teal-50 rounded-lg p-2 mb-3 self-start" aria-hidden="true">verified</span><p class="period-kpi-label text-label-md text-slate-500"></p><p class="period-kpi-value text-display-lg font-display-lg text-[#099999] mt-1"></p><p class="period-kpi-context text-xs text-slate-500 mt-2"></p></div>
+          <!-- Avg Release Time -->
+          <div class="glass-card p-6 rounded-[16px] flex flex-col justify-between min-h-40 group" data-period-kpi="1"><span class="material-symbols-outlined text-[#099999] bg-teal-50 rounded-lg p-2 mb-3 self-start" aria-hidden="true">schedule</span><p class="period-kpi-label text-label-md text-slate-500"></p><p class="period-kpi-value text-display-lg font-display-lg text-[#099999] mt-1"></p><p class="period-kpi-context text-xs text-slate-500 mt-2"></p></div>
+          <!-- Deviation Index -->
+          <div class="glass-card p-6 rounded-[16px] flex flex-col justify-between min-h-40 group" data-period-kpi="2"><span class="material-symbols-outlined text-[#099999] bg-teal-50 rounded-lg p-2 mb-3 self-start" aria-hidden="true">warning</span><p class="period-kpi-label text-label-md text-slate-500"></p><p class="period-kpi-value text-display-lg font-display-lg text-[#099999] mt-1"></p><p class="period-kpi-context text-xs text-slate-500 mt-2"></p></div>
+          <!-- Audit Readiness -->
+          <div class="glass-card p-6 rounded-[16px] flex flex-col justify-between min-h-40 group" data-period-kpi="3"><span class="material-symbols-outlined text-[#099999] bg-teal-50 rounded-lg p-2 mb-3 self-start" aria-hidden="true">fact_check</span><p class="period-kpi-label text-label-md text-slate-500"></p><p class="period-kpi-value text-display-lg font-display-lg text-[#099999] mt-1"></p><p class="period-kpi-context text-xs text-slate-500 mt-2"></p></div>
+        </section>
+        <!-- Main Analytics Section (Bento Grid) -->
+        <section class="grid grid-cols-12 gap-8">
+          <!-- Chart: Quality Trend Line -->
+          <div class="col-span-12 lg:col-span-8 glass-card p-8 rounded-[16px] period-panel p-5 md:p-6" data-period-panel="trend" data-config="0"><h3 class="text-headline-md font-headline-md mb-3">Manufacturing Quality Trends</h3><div class="period-panel-body"></div></div>
+          <!-- Executive Insights Panel -->
+          <div class="col-span-12 lg:col-span-4 glass-card p-8 rounded-[16px] flex flex-col period-panel p-5 md:p-6" data-period-panel="brief" data-config=""><h3 class="text-headline-md font-headline-md mb-3">Executive Insights</h3><div class="period-panel-body"></div></div>
+          <!-- Chart: Deviation Types Bar Chart -->
+          <div class="col-span-12 lg:col-span-6 glass-card p-8 rounded-[16px] period-panel p-5 md:p-6" data-period-panel="dist" data-config="deviations|Process|Documentation|Equipment|Materials"><h3 class="text-headline-md font-headline-md mb-3">Deviations by Type</h3><div class="period-panel-body"></div></div>
+          <!-- Alerts / Risks Panel -->
+          <div class="col-span-12 lg:col-span-6 glass-card p-8 rounded-[16px] period-panel p-5 md:p-6" data-period-panel="risk" data-config=""><h3 class="text-headline-md font-headline-md mb-3">Critical Alerts &amp; Risks</h3><div class="period-panel-body"></div></div>
+          <!-- Chart: Facility Compliance Distribution -->
+          <div class="col-span-12 glass-card p-8 rounded-[16px] period-panel p-5 md:p-6" data-period-panel="trend" data-config="3"><h3 class="text-headline-md font-headline-md mb-3">Audit Readiness Trend</h3><div class="period-panel-body"></div></div>
+        </section>
+      </div>
+    </div>
+    <div id="section-scientific" class="section-content" style="display:none" data-section="scientific">
+      <!-- Dashboard Body -->
+<div class="p-8 max-w-[1600px] mx-auto w-full space-y-8">
+<!-- KPI Cards Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-gutter">
+<!-- KPI 1 -->
+<div class="bg-white p-6 rounded-xl shadow-sm border  flex flex-col gap-4" data-period-kpi="0"><span class="material-symbols-outlined text-[#099999] bg-teal-50 rounded-lg p-2 mb-3 self-start" aria-hidden="true">biotech</span><p class="period-kpi-label text-label-md text-slate-500"></p><p class="period-kpi-value text-display-lg font-display-lg text-[#099999] mt-1"></p><p class="period-kpi-context text-xs text-slate-500 mt-2"></p></div>
+<!-- KPI 2 -->
+<div class="bg-white p-6 rounded-xl shadow-sm border  flex flex-col gap-4" data-period-kpi="1"><span class="material-symbols-outlined text-[#099999] bg-teal-50 rounded-lg p-2 mb-3 self-start" aria-hidden="true">rocket_launch</span><p class="period-kpi-label text-label-md text-slate-500"></p><p class="period-kpi-value text-display-lg font-display-lg text-[#099999] mt-1"></p><p class="period-kpi-context text-xs text-slate-500 mt-2"></p></div>
+<!-- KPI 3 -->
+<div class="bg-white p-6 rounded-xl shadow-sm border  flex flex-col gap-4" data-period-kpi="2"><span class="material-symbols-outlined text-[#099999] bg-teal-50 rounded-lg p-2 mb-3 self-start" aria-hidden="true">history_edu</span><p class="period-kpi-label text-label-md text-slate-500"></p><p class="period-kpi-value text-display-lg font-display-lg text-[#099999] mt-1"></p><p class="period-kpi-context text-xs text-slate-500 mt-2"></p></div>
+<!-- KPI 4 -->
+<div class="bg-white p-6 rounded-xl shadow-sm border  flex flex-col gap-4" data-period-kpi="3"><span class="material-symbols-outlined text-[#099999] bg-teal-50 rounded-lg p-2 mb-3 self-start" aria-hidden="true">support_agent</span><p class="period-kpi-label text-label-md text-slate-500"></p><p class="period-kpi-value text-display-lg font-display-lg text-[#099999] mt-1"></p><p class="period-kpi-context text-xs text-slate-500 mt-2"></p></div>
+</div>
+<!-- Bento Grid Section -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
+<!-- Main Chart: Pipeline Development -->
+<div class="lg:col-span-8 bg-white p-8 rounded-xl shadow-sm border  h-[450px] flex flex-col period-panel p-5 md:p-6" data-period-panel="trend" data-config="1"><h3 class="text-headline-md font-headline-md mb-3">Pipeline Development</h3><div class="period-panel-body"></div></div>
+<!-- Secondary Chart: Trial Phase Distribution -->
+<div class="lg:col-span-4 bg-white p-8 rounded-xl shadow-sm border  flex flex-col period-panel p-5 md:p-6" data-period-panel="dist" data-config="0|Phase I|Phase II|Phase III|Phase IV"><h3 class="text-headline-md font-headline-md mb-3">Trial Phases</h3><div class="period-panel-body"></div></div>
+<!-- Research Spend Bar Chart -->
+<div class="lg:col-span-4 bg-white p-8 rounded-xl shadow-sm border  h-[400px] flex flex-col period-panel p-5 md:p-6" data-period-panel="trend" data-config="spend"><h3 class="text-headline-md font-headline-md mb-3">Research Spend</h3><div class="period-panel-body"></div></div>
+<!-- Executive Insights Panel -->
+<div class="lg:col-span-4 glass-panel p-8 rounded-xl flex flex-col period-panel p-5 md:p-6" data-period-panel="brief" data-config=""><h3 class="text-headline-md font-headline-md mb-3">Executive Insights</h3><div class="period-panel-body"></div></div>
+<!-- Alerts / Risks Panel -->
+<div class="lg:col-span-4 bg-[#1b1c1c] p-8 rounded-xl text-white flex flex-col period-panel p-5 md:p-6" data-period-panel="risk" data-config=""><h3 class="text-headline-md font-headline-md mb-3">Alerts &amp; Risks</h3><div class="period-panel-body"></div></div>
+</div>
+<!-- Bottom Data Table Section -->
+<div class="bg-white rounded-xl shadow-sm border  overflow-hidden period-panel p-5 md:p-6" data-period-panel="table" data-config="0|Discovery|Recruitment|Trial execution|Reporting"><h3 class="text-headline-md font-headline-md mb-3">Clinical Trials by Stage</h3><div class="period-panel-body"></div></div>
+</div>
+    </div>
+    <div id="section-quality_comp" class="section-content" style="display:none" data-section="quality_comp">
+      <!-- Content Canvas -->
+<div class="max-w-[1600px] mx-auto p-8 space-y-8">
+<!-- Page Header / Executive Summary -->
+<div class="space-y-2">
+<h2 class="font-headline-xl text-primary">Quality Operations &amp; Compliance</h2>
+<p class="font-body-lg text-on-surface-variant max-w-3xl">Ensuring global regulatory adherence, GXP compliance, and pharmacovigilance safety across all manufacturing and distribution hubs.</p>
+</div>
+<!-- KPI Row (Glassmorphic Bento) -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+<!-- KPI 1 -->
+<div class="glass-panel p-6 rounded-2xl shadow-sm border-white" data-period-kpi="0"><span class="material-symbols-outlined text-[#099999] bg-teal-50 rounded-lg p-2 mb-3 self-start" aria-hidden="true">description</span><p class="period-kpi-label text-label-md text-slate-500"></p><p class="period-kpi-value text-display-lg font-display-lg text-[#099999] mt-1"></p><p class="period-kpi-context text-xs text-slate-500 mt-2"></p></div>
+<!-- KPI 2 -->
+<div class="glass-panel p-6 rounded-2xl shadow-sm border-white" data-period-kpi="1"><span class="material-symbols-outlined text-[#099999] bg-teal-50 rounded-lg p-2 mb-3 self-start" aria-hidden="true">security</span><p class="period-kpi-label text-label-md text-slate-500"></p><p class="period-kpi-value text-display-lg font-display-lg text-[#099999] mt-1"></p><p class="period-kpi-context text-xs text-slate-500 mt-2"></p></div>
+<!-- KPI 3 -->
+<div class="glass-panel p-6 rounded-2xl shadow-sm border-white" data-period-kpi="2"><span class="material-symbols-outlined text-[#099999] bg-teal-50 rounded-lg p-2 mb-3 self-start" aria-hidden="true">inventory</span><p class="period-kpi-label text-label-md text-slate-500"></p><p class="period-kpi-value text-display-lg font-display-lg text-[#099999] mt-1"></p><p class="period-kpi-context text-xs text-slate-500 mt-2"></p></div>
+<!-- KPI 4 -->
+<div class="glass-panel p-6 rounded-2xl shadow-sm border-white" data-period-kpi="3"><span class="material-symbols-outlined text-[#099999] bg-teal-50 rounded-lg p-2 mb-3 self-start" aria-hidden="true">school</span><p class="period-kpi-label text-label-md text-slate-500"></p><p class="period-kpi-value text-display-lg font-display-lg text-[#099999] mt-1"></p><p class="period-kpi-context text-xs text-slate-500 mt-2"></p></div>
+</div>
+<!-- Main Charts Section -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+<!-- Compliance Trend (Main) -->
+<div class="lg:col-span-2 glass-panel p-8 rounded-2xl shadow-md border-white period-panel p-5 md:p-6" data-period-panel="trend" data-config="2"><h3 class="text-headline-md font-headline-md mb-3">Compliance Score Trend</h3><div class="period-panel-body"></div></div>
+<!-- Executive Insights -->
+<div class="glass-panel p-8 rounded-2xl shadow-md border-white flex flex-col period-panel p-5 md:p-6" data-period-panel="brief" data-config=""><h3 class="text-headline-md font-headline-md mb-3">Executive Insights</h3><div class="period-panel-body"></div></div>
+</div>
+<!-- Bottom Row: Submissions and Alerts -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+<!-- Bar Chart: Submission Status -->
+<div class="glass-panel p-8 rounded-2xl shadow-md border-white period-panel p-5 md:p-6" data-period-panel="dist" data-config="0|Preparation|Submitted|Under review|Response due"><h3 class="text-headline-md font-headline-md mb-3">Submission Status Distribution</h3><div class="period-panel-body"></div></div>
+<!-- Alerts / Risks Panel -->
+<div class="glass-panel p-8 rounded-2xl shadow-md border-white period-panel p-5 md:p-6" data-period-panel="risk" data-config=""><h3 class="text-headline-md font-headline-md mb-3">Alerts &amp; Critical Risks</h3><div class="period-panel-body"></div></div>
+</div>
+<!-- Bottom Illustration Section -->
+<div class="relative h-64 rounded-3xl overflow-hidden shadow-2xl">
+<img alt="Modern Pharmaceutical Laboratory" class="w-full h-full object-cover" data-alt="Ultra-modern sterile pharmaceutical laboratory with stainless steel equipment, glass partitions, and bright blue ambient lighting, high-tech and precise." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCETMEatYgX7VJYx7sfHsFrDVUuEpqiBvDHyd8qe2c5mPSiteif_bapMHBJoiXcA__1yS20L6kR_ftLx3HRNNtE-HYZynfm29Kaz4gjV5yUP87TS9TEIxJEaQwaCfZyfz8M8zIIL0HXzoFdv5kU2OVaBKRbbjZTWNqMjL3sG-JA9k5jzAOLCqrOz91jUwQKFYJCrxzsVDYRkanFVJDSPKa9G1TjuyGC5uuCsbmGTIhYKYyYQ_jcPy1u6S9ka705iFc9rPHmAna2DpE">
+<div class="absolute inset-0 laboratory-overlay flex items-center px-12">
+<div class="max-w-md text-white">
+<h4 class="text-2xl font-extrabold mb-2">Zero-Tolerance Quality</h4>
+<p class="text-white/80 text-sm leading-relaxed">At Dar Aldawa, our commitment to patient safety is reinforced through rigorous multi-tier compliance audits and risk monitoring.</p>
+</div>
+</div>
+</div>
+</div>
+    </div>
+    <div id="section-bd" class="section-content" style="display:none" data-section="bd">
+      <!-- Dashboard Canvas -->
+<div class="p-8 max-w-[1600px] mx-auto space-y-8">
+<!-- Hero Summary Section -->
+<section class="flex flex-col md:flex-row md:items-end justify-between gap-6">
+<div class="space-y-2">
+<h2 class="font-headline-xl text-primary font-extrabold">Executive Summary</h2>
+<p class="text-body-lg text-on-surface-variant max-w-2xl">
+                        Strategic partnerships, licensing opportunities, and market expansion deals.
+                    </p>
+</div>
+<div class="flex space-x-3">
+<button class="px-6 py-2.5 bg-primary text-white rounded-lg font-medium shadow-lg shadow-primary/20 hover:scale-[1.02] transition-transform active:scale-95 flex items-center" data-action="deal" type="button">
+<span class="material-symbols-outlined mr-2 text-lg">add_circle</span>
+                        New Deal Entry
+                    </button>
+<button class="px-6 py-2.5 bg-white text-primary border border-primary/20 rounded-lg font-medium hover:bg-slate-50 transition-colors flex items-center" data-action="report" type="button">
+<span class="material-symbols-outlined mr-2 text-lg">description</span>
+                        Export Report
+                    </button>
+</div>
+</section>
+<!-- KPI Cards Grid -->
+<section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+<!-- KPI 1 -->
+<div class="glass-card p-6 rounded-2xl flex flex-col justify-between" data-period-kpi="0"><span class="material-symbols-outlined text-[#099999] bg-teal-50 rounded-lg p-2 mb-3 self-start" aria-hidden="true">rocket_launch</span><p class="period-kpi-label text-label-md text-slate-500"></p><p class="period-kpi-value text-display-lg font-display-lg text-[#099999] mt-1"></p><p class="period-kpi-context text-xs text-slate-500 mt-2"></p></div>
+<!-- KPI 2 -->
+<div class="glass-card p-6 rounded-2xl flex flex-col justify-between" data-period-kpi="1"><span class="material-symbols-outlined text-[#099999] bg-teal-50 rounded-lg p-2 mb-3 self-start" aria-hidden="true">handshake</span><p class="period-kpi-label text-label-md text-slate-500"></p><p class="period-kpi-value text-display-lg font-display-lg text-[#099999] mt-1"></p><p class="period-kpi-context text-xs text-slate-500 mt-2"></p></div>
+<!-- KPI 3 -->
+<div class="glass-card p-6 rounded-2xl flex flex-col justify-between" data-period-kpi="2"><span class="material-symbols-outlined text-[#099999] bg-teal-50 rounded-lg p-2 mb-3 self-start" aria-hidden="true">payments</span><p class="period-kpi-label text-label-md text-slate-500"></p><p class="period-kpi-value text-display-lg font-display-lg text-[#099999] mt-1"></p><p class="period-kpi-context text-xs text-slate-500 mt-2"></p></div>
+<!-- KPI 4 -->
+<div class="glass-card p-6 rounded-2xl flex flex-col justify-between" data-period-kpi="3"><span class="material-symbols-outlined text-[#099999] bg-teal-50 rounded-lg p-2 mb-3 self-start" aria-hidden="true">public</span><p class="period-kpi-label text-label-md text-slate-500"></p><p class="period-kpi-value text-display-lg font-display-lg text-[#099999] mt-1"></p><p class="period-kpi-context text-xs text-slate-500 mt-2"></p></div>
+</section>
+<!-- Main Charts & Insights Grid (Bento Style) -->
+<section class="grid grid-cols-12 gap-6">
+<!-- Chart: Deal Flow Pipeline -->
+<div class="col-span-12 lg:col-span-8 glass-card p-8 rounded-2xl h-[450px] relative overflow-hidden period-panel p-5 md:p-6" data-period-panel="dist" data-config="0|Screening|Due diligence|Negotiation|Final review"><h3 class="text-headline-md font-headline-md mb-3">Deal Flow Pipeline</h3><div class="period-panel-body"></div></div>
+<!-- Insights Panel -->
+<div class="col-span-12 lg:col-span-4 glass-card p-8 rounded-2xl overflow-hidden flex flex-col period-panel p-5 md:p-6" data-period-panel="brief" data-config=""><h3 class="text-headline-md font-headline-md mb-3">Executive Insights</h3><div class="period-panel-body"></div></div>
+<!-- Regional Distribution -->
+<div class="col-span-12 lg:col-span-4 glass-card p-8 rounded-2xl period-panel p-5 md:p-6" data-period-panel="dist" data-config="0|MENA|Europe|Africa|Other"><h3 class="text-headline-md font-headline-md mb-3">Regional Distribution</h3><div class="period-panel-body"></div></div>
+<!-- ROI Trend Line Chart -->
+<div class="col-span-12 lg:col-span-8 glass-card p-8 rounded-2xl relative overflow-hidden bg-white period-panel p-5 md:p-6" data-period-panel="trend" data-config="1"><h3 class="text-headline-md font-headline-md mb-3">ROI Performance Trend</h3><div class="period-panel-body"></div></div>
+</section>
+<!-- Alerts / Risks & Deal Table -->
+<section class="grid grid-cols-12 gap-6 period-panel p-5 md:p-6" data-period-panel="risk" data-config=""><h3 class="text-headline-md font-headline-md mb-3">Critical Deal Watchlist</h3><div class="period-panel-body"></div></section>
+</div>
+    </div>
+    <div id="section-it" class="section-content" style="display:none" data-section="it">
+      <!-- Dashboard Content -->
+<section class="flex-1 overflow-y-auto p-margin space-y-gutter">
+<div class="max-w-[1600px] mx-auto space-y-gutter">
+<!-- KPI Cards (Bento Style) -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-gutter">
+<!-- Uptime KPI -->
+<div class="glass-panel p-md rounded-2xl shadow-sm hover:shadow-md transition-shadow" data-period-kpi="0"><span class="material-symbols-outlined text-[#099999] bg-teal-50 rounded-lg p-2 mb-3 self-start" aria-hidden="true">timer</span><p class="period-kpi-label text-label-md text-slate-500"></p><p class="period-kpi-value text-display-lg font-display-lg text-[#099999] mt-1"></p><p class="period-kpi-context text-xs text-slate-500 mt-2"></p></div>
+<!-- Cyber Security KPI -->
+<div class="glass-panel p-md rounded-2xl shadow-sm hover:shadow-md transition-shadow" data-period-kpi="1"><span class="material-symbols-outlined text-[#099999] bg-teal-50 rounded-lg p-2 mb-3 self-start" aria-hidden="true">shield_lock</span><p class="period-kpi-label text-label-md text-slate-500"></p><p class="period-kpi-value text-display-lg font-display-lg text-[#099999] mt-1"></p><p class="period-kpi-context text-xs text-slate-500 mt-2"></p></div>
+<!-- Digital Transformation KPI -->
+<div class="glass-panel p-md rounded-2xl shadow-sm hover:shadow-md transition-shadow" data-period-kpi="2"><span class="material-symbols-outlined text-[#099999] bg-teal-50 rounded-lg p-2 mb-3 self-start" aria-hidden="true">rocket_launch</span><p class="period-kpi-label text-label-md text-slate-500"></p><p class="period-kpi-value text-display-lg font-display-lg text-[#099999] mt-1"></p><p class="period-kpi-context text-xs text-slate-500 mt-2"></p></div>
+<!-- Support Efficiency KPI -->
+<div class="glass-panel p-md rounded-2xl shadow-sm hover:shadow-md transition-shadow" data-period-kpi="3"><span class="material-symbols-outlined text-[#099999] bg-teal-50 rounded-lg p-2 mb-3 self-start" aria-hidden="true">support_agent</span><p class="period-kpi-label text-label-md text-slate-500"></p><p class="period-kpi-value text-display-lg font-display-lg text-[#099999] mt-1"></p><p class="period-kpi-context text-xs text-slate-500 mt-2"></p></div>
+</div>
+<!-- Charts and Insights Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-gutter">
+<!-- Uptime Trend (Main Chart) -->
+<div class="lg:col-span-2 glass-panel p-md rounded-2xl shadow-sm period-panel p-5 md:p-6" data-period-panel="trend" data-config="0"><h3 class="text-headline-md font-headline-md mb-3">Network Performance Trend</h3><div class="period-panel-body"></div></div>
+<!-- Executive Insights Panel -->
+<div class="glass-panel p-md rounded-2xl shadow-sm border-l-4 border-[#099999] period-panel p-5 md:p-6" data-period-panel="brief" data-config=""><h3 class="text-headline-md font-headline-md mb-3">Executive Insights</h3><div class="period-panel-body"></div></div>
+</div>
+<!-- Bottom Row: Multi-layout Stats -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-gutter pb-8">
+<!-- Infrastructure Cost Bar Chart -->
+<div class="glass-panel p-md rounded-2xl shadow-sm period-panel p-5 md:p-6" data-period-panel="trend" data-config="cloud"><h3 class="text-headline-md font-headline-md mb-3">Infrastructure Costs</h3><div class="period-panel-body"></div></div>
+<!-- Ticket Resolution Distribution -->
+<div class="glass-panel p-md rounded-2xl shadow-sm text-center period-panel p-5 md:p-6" data-period-panel="trend" data-config="3"><h3 class="text-headline-md font-headline-md mb-3">Resolution Time Trend</h3><div class="period-panel-body"></div></div>
+<!-- Alerts / Risks Panel -->
+<div class="glass-panel p-md rounded-2xl shadow-sm bg-error-container/20 period-panel p-5 md:p-6" data-period-panel="risk" data-config=""><h3 class="text-headline-md font-headline-md mb-3">Alerts / Risks</h3><div class="period-panel-body"></div></div>
+</div>
+</div>
+</section>
+    </div>
+
+  </div>
+</div>
+</div>
+
+<!-- ════════════ NOTIFICATION PANEL ════════════ -->
+<div id="notif-panel">
+  <div class="flex items-center justify-between px-5 py-4 border-b ">
+    <h3 class="font-bold text-sm text-slate-800">Notifications</h3>
+    <div class="flex items-center gap-2">
+      <span class="text-xs text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full font-semibold" id="notif-count">9 new</span>
+      <button onclick="clearNotifs()" class="text-xs text-[#099999] font-semibold hover:underline" type="button">Mark all read</button>
+    </div>
+  </div>
+  <div id="notif-list" class="py-2"></div>
+</div>
+
+<!-- ════════════ SEARCH OVERLAY ════════════ -->
+<div id="search-overlay" onclick="closeSearch(event)">
+  <div id="search-box" onclick="event.stopPropagation()">
+    <div class="relative">
+      <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" style="font-size:20px">search</span>
+      <input id="search-input" aria-label="Search sections and metrics" type="text" placeholder="Search sections, metrics..." oninput="doSearch(this.value)" autofocus>
+    </div>
+    <div id="search-results">
+      <p class="text-xs text-slate-400 px-4 py-3 font-semibold uppercase tracking-wider">All Sections</p>
+    </div>
+  </div>
+</div>
+
+<!-- FAB -->
+<button class="fixed bottom-6 right-6 bg-[#099999] text-white w-12 h-12 rounded-full shadow-xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all z-50 shadow-blue-900/30" aria-label="Quick actions" data-action="quick" type="button">
+  <span class="material-symbols-outlined" style="font-size:22px">add</span>
+</button>
+
+<!-- ════════════ JAVASCRIPT ════════════ -->
+<script>
+
+const PERIODS = {
+  Q1: { label: `Q1 2026`, context: `Jan–Mar 2026 · Demo actuals`, end: 0 },
+  Q2: { label: `Q2 2026`, context: `Apr–Jun 2026 · Demo actuals`, end: 1 },
+  Q3: { label: `Q3 2026`, context: `Jul–Sep 2026 · Demo actuals`, end: 2 },
+  Q4: { label: `Q4 2026 Forecast`, context: `Oct–Dec 2026 · Demo forecast`, end: 3 },
+  YTD: { label: `YTD 2026`, context: `Jan–Sep 2026 · Demo actuals`, end: 2 },
+};
+const QUARTERS = [`Q1`, `Q2`, `Q3`, `Q4`];
+
+// Each series lists the four demo quarters followed by the closed-period YTD value.
+const REPORT = {
+  marketing: {
+    metrics: [
+      [`Total Revenue`, `usdM`, [38.2, 40.5, 42.8, 46.1, 121.5]],
+      [`Market Share`, `percent`, [17.1, 17.8, 18.5, 19.2, 18.5]],
+      [`Customer Acquisition Cost`, `usd`, [1380, 1310, 1240, 1190, 1304]],
+      [`Sales Growth YoY`, `percent`, [11.4, 12.1, 14.2, 15.8, 12.6]],
+    ],
+    risks: [`Review distributor coverage before the market relaunch.`, `Monitor currency exposure in open distributor orders.`, `Critical supply lag may interrupt replenishment in priority markets.`, `Forecast depends on replenishment ahead of the seasonal sales peak.`],
+  },
+  gm: {
+    metrics: [
+      [`Strategic Goal Completion`, `percent`, [82.4, 84.1, 87.4, 89.2, 87.4]],
+      [`Operational Efficiency`, `percent`, [91.2, 92.8, 94.1, 95.1, 92.7]],
+      [`High-Priority Projects`, `projects`, [8, 10, 12, 13, 12]],
+      [`R&D Investment Utilization`, `usdM`, [3.1, 3.6, 4.2, 4.8, 10.9]],
+    ],
+    risks: [`Confirm ownership of the remaining strategic workstreams.`, `Review dependencies before transferring the pilot to operations.`, `Two high-priority projects remain open for review.`, `Forecast assumes delivery of the remaining QA integration work.`],
+  },
+  operations: {
+    metrics: [
+      [`Production Yield`, `percent2`, [97.70, 98.06, 98.45, 98.64, 98.07]],
+      [`Average Lead Time`, `days`, [16.4, 15.1, 14.2, 13.5, 15.2]],
+      [`Inventory Turnover`, `times`, [5.1, 5.5, 5.8, 6.1, 5.8]],
+      [`Overall Equipment Effectiveness`, `percent`, [79.4, 80.8, 82.1, 84.3, 80.8]],
+    ],
+    risks: [`Check raw material buffers before peak production.`, `Review supplier lead times for packaging materials.`, `Escalate the maintenance plan for Line 3.`, `Forecast depends on completing scheduled maintenance.`],
+  },
+  finance: {
+    metrics: [
+      [`Net Profit Margin`, `percent`, [12.1, 12.8, 12.5, 13.2, 12.5]],
+      [`EBITDA`, `usdM`, [5.8, 6.2, 6.8, 7.4, 18.8]],
+      [`Operating Cash Flow`, `usdM`, [2.8, 3.1, 4.2, 5.1, 10.1]],
+      [`Budget vs Actual`, `percent`, [96.4, 97.1, 98.2, 99.3, 97.3]],
+    ],
+    revenue: [`Revenue`, `usdM`, [38.2, 40.5, 42.8, 46.1, 121.5]],
+    expenses: [`Operating Expenses`, `usdM`, [6.2, 6.5, 6.8, 7.1, 19.5]],
+    risks: [`Review early-year collections against the cash plan.`, `Check the impact of freight charges on operating expenses.`, `Monitor exchange-rate exposure before the next settlement.`, `Cash-flow forecast depends on collections from key accounts.`],
+  },
+  hr: {
+    metrics: [
+      [`Headcount`, `count`, [1401, 1438, 1482, 1510, 1482]],
+      [`Retention Rate`, `percent`, [93.2, 94.1, 94.8, 95.2, 94.8]],
+      [`Training Completion`, `percent`, [80.1, 81.2, 82.0, 83.5, 82.0]],
+      [`Internal Mobility`, `percent`, [16.2, 17.4, 18.4, 19.1, 18.4]],
+    ],
+    risks: [`Confirm onboarding capacity for planned hires.`, `Follow up on training gaps in field teams.`, `Review retention in hard-to-fill roles.`, `Training forecast assumes all remaining cohorts run as planned.`],
+  },
+  quality_ops: {
+    metrics: [
+      [`Batch Pass Rate`, `percent`, [97.4, 97.8, 98.2, 98.7, 97.8]],
+      [`Average Release Time`, `days`, [4.8, 4.5, 4.2, 3.9, 4.5]],
+      [`Deviation Index`, `decimal2`, [0.18, 0.16, 0.14, 0.11, 0.16]],
+      [`Audit Readiness`, `score`, [91, 92, 94, 96, 94]],
+    ],
+    deviations: [`Recorded Deviations`, `count`, [24, 21, 17, 14, 62]],
+    risks: [`Validate corrective actions for recurring process deviations.`, `Check calibration renewals before the release peak.`, `Reagent stock on Line 2 requires follow-up before the audit.`, `Readiness forecast assumes corrective actions close before inspection.`],
+  },
+  scientific: {
+    metrics: [
+      [`Active Clinical Trials`, `count`, [38, 40, 42, 45, 42]],
+      [`Pipeline Progress`, `percent0`, [61, 65, 68, 71, 68]],
+      [`Publication Index`, `decimal1`, [13.4, 14.1, 14.8, 15.5, 14.8]],
+      [`Medical Inquiries`, `count`, [1080, 1160, 1240, 1340, 3480]],
+    ],
+    spend: [`Research Spend`, `usdM`, [2.6, 2.9, 3.2, 3.5, 8.7]],
+    risks: [`Confirm site activation for new clinical trials.`, `Review recruitment at low-enrolling sites.`, `Track Phase II study review ahead of the next submission.`, `Pipeline forecast depends on recruitment at two trial sites.`],
+  },
+  quality_comp: {
+    metrics: [
+      [`Regulatory Submissions`, `count`, [128, 135, 142, 151, 142]],
+      [`PV Safety Signals`, `count`, [10, 9, 8, 7, 8]],
+      [`Compliance Score`, `percent0`, [96, 97, 98, 99, 98]],
+      [`SOP Completion`, `percent0`, [78, 80, 82, 86, 82]],
+    ],
+    risks: [`Prioritize dossiers with confirmed response dates.`, `Follow up on SOP approvals before training begins.`, `Review the eight open pharmacovigilance signals.`, `Forecast assumes priority dossiers clear internal review.`],
+  },
+  bd: {
+    metrics: [
+      [`Active Deal Pipeline`, `count`, [18, 21, 24, 27, 24]],
+      [`Partnership ROI`, `percent`, [11.2, 14.8, 18.4, 21.2, 18.4]],
+      [`Acquisition Cost`, `usdM`, [1.4, 1.3, 1.2, 1.2, 1.3]],
+      [`New Markets`, `count`, [8, 10, 12, 14, 12]],
+    ],
+    risks: [`Confirm diligence scope for shortlisted partners.`, `Resolve territory overlap before term-sheet approval.`, `Review legal dependencies for deals in final negotiation.`, `ROI forecast depends on closing priority licensing deals.`],
+  },
+  it: {
+    metrics: [
+      [`System Uptime`, `percent2`, [99.91, 99.94, 99.97, 99.98, 99.94]],
+      [`Security Incidents`, `count`, [5, 3, 2, 1, 10]],
+      [`Digital Transformation Progress`, `percent0`, [64, 69, 74, 82, 74]],
+      [`Resolution Time`, `hours`, [2.1, 1.8, 1.4, 1.2, 1.8]],
+    ],
+    cloud: [`Infrastructure Cost`, `usd`, [39200, 40800, 42500, 44100, 122500]],
+    risks: [`Check backup recovery tests for core systems.`, `Confirm access reviews for privileged accounts.`, `Schedule database patching in the next maintenance window.`, `Uptime forecast assumes planned ERP capacity upgrades.`],
+  },
+};
+
+let currentSection = `marketing`;
+let currentFilter = `Q3`;
+let darkMode = false;
+let sidebarCollapsed = false;
+let notifOpen = false;
+let notifRead = false;
+
+const numberFormat = new Intl.NumberFormat(`en-US`);
+const formats = {
+  usdM: v => `$${v.toFixed(1)}M`,
+  usd: v => `$${numberFormat.format(v)}`,
+  percent: v => `${v.toFixed(1)}%`,
+  percent2: v => `${v.toFixed(2)}%`,
+  percent0: v => `${v}%`,
+  days: v => `${v.toFixed(1)} days`,
+  hours: v => `${v.toFixed(1)} h`,
+  times: v => `${v.toFixed(1)}×`,
+  projects: v => `${v} / 14`,
+  score: v => `${v} / 100`,
+  count: v => numberFormat.format(v),
+  decimal1: v => v.toFixed(1),
+  decimal2: v => v.toFixed(2),
+};
+const metricAt = (report, key) => /^\d$/.test(key) ? report.metrics[Number(key)] : report[key];
+const periodValue = (metric, quarter = currentFilter) =>
+  formats[metric[1]](metric[2][quarter === `YTD` ? 4 : PERIODS[quarter].end]);
+
+function showSection(id) {
+  if (!Object.hasOwn(REPORT, id)) return;
+  toggleMobileMenu(false);
+  if (id === currentSection) return;
+  document.getElementById(`section-${currentSection}`).style.display = `none`;
+  const previousNav = document.getElementById(`nav-${currentSection}`);
+  previousNav.classList.remove(`nav-active`);
+  previousNav.removeAttribute(`aria-current`);
+  currentSection = id;
+  const activeNav = document.getElementById(`nav-${id}`);
+  activeNav.classList.add(`nav-active`);
+  activeNav.setAttribute(`aria-current`, `page`);
+  document.getElementById(`section-title`).textContent = activeNav.dataset.label;
+  renderPeriodReport();
+  document.getElementById(`section-${id}`).style.display = `block`;
+  document.getElementById(`content-area`).scrollTop = 0;
+}
+
+function setFilter(quarter) {
+  if (!Object.hasOwn(PERIODS, quarter) || quarter === currentFilter) return;
+  currentFilter = quarter;
+  notifRead = false;
+  renderPeriodReport();
+  buildNotifications();
+}
+
+function trendChart(metrics, period) {
+  const quarters = QUARTERS.slice(0, period.end + 1);
+  const values = metrics.flatMap(metric => metric[2].slice(0, quarters.length));
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  const colors = [`var(--theme-accent)`, `var(--theme-chart-secondary)`];
+  const xs = quarters.map((_, i) => quarters.length === 1 ? 160 : 30 + 260 * i / (quarters.length - 1));
+  const scaleY = value => 99 - (value - min) / (max - min || 1) * 73;
+  const series = metrics.map((metric, i) => {
+    const points = xs.map((x, j) => [x, scaleY(metric[2][j])]);
+    const forecast = currentFilter === `Q4` ? points.slice(-2) : [];
+    const actual = forecast.length ? points.slice(0, -1) : points;
+    const dots = points.map(([x, y], j) => `<circle cx="${x}" cy="${y}" r="3.5" class="${j === 3 ? `chart-forecast-dot` : ``}" fill="${colors[i]}" stroke="${colors[i]}" stroke-width="2"><title>${quarters[j]} ${metric[0]}: ${periodValue(metric, quarters[j])}</title></circle>`).join(``);
+    return `<polyline points="${actual.join(` `)}" fill="none" stroke="${colors[i]}" stroke-width="2.5" stroke-linejoin="round"/>${forecast.length ? `<polyline points="${forecast.join(` `)}" fill="none" stroke="${colors[i]}" stroke-width="2.5" stroke-dasharray="5 4"/>` : ``}${dots}`;
+  }).join(``);
+  const caption = metrics.map(metric => `${metric[0]}: ${quarters.map(q => `${q} ${periodValue(metric, q)}`).join(`, `)}`).join(`; `);
+  const readout = quarters.map(q => `<div class="text-center"><p class="text-[11px] text-slate-500">${q}${q === `Q4` ? ` Forecast` : ``}</p>${metrics.map((m, i) => `<p class="text-xs font-semibold" style="color:${colors[i]}">${periodValue(m, q)}</p>`).join(``)}</div>`).join(``);
+  return `<svg class="w-full max-h-44" viewBox="0 0 320 112" aria-label="${caption}" role="img"><path d="M 20 25 H 302 M 20 62 H 302 M 20 100 H 302" stroke="var(--theme-chart-track)" fill="none"/>${series}</svg><div class="grid gap-2" style="grid-template-columns:repeat(${quarters.length},minmax(0,1fr))">${readout}</div>${metrics.length > 1 ? `<p class="mt-3 text-xs text-slate-500">${metrics.map((m,i) => `<span class="mr-3" style="color:${colors[i]}">${m[0]}</span>`).join(``)}</p>` : ``}`;
+}
+
+function distribution(metric, labels, period, table) {
+  const total = metric[2][currentFilter === `YTD` ? 4 : period.end];
+  const weights = [42 - period.end, 29, 18 + period.end, 11];
+  const precision = metric[1] === `usdM` ? 10 : 1;
+  const units = Math.round(total * precision);
+  const counts = weights.map(weight => Math.floor(units * weight / 100));
+  counts[0] += units - counts.reduce((sum, value) => sum + value, 0);
+  const rows = labels.map((label, i) => [label, counts[i], formats[metric[1]](counts[i] / precision)]);
+  if (table) {
+    return `<table class="w-full text-sm"><thead><tr><th class="text-left py-2">Stage</th><th class="text-right">Active trials</th></tr></thead><tbody>${rows.map(([label, , value]) => `<tr class="border-t border-slate-200"><td class="py-2">${label}</td><td class="text-right font-semibold">${value}</td></tr>`).join(``)}</tbody></table>`;
+  }
+  return rows.map(([label, count, value]) => `<div class="mb-3"><div class="flex justify-between gap-2 text-xs mb-1"><span>${label}</span><strong>${value}</strong></div><div class="h-2 rounded-full chart-track overflow-hidden"><div class="h-full rounded-full chart-fill" style="width:${units ? count / units * 100 : 0}%"></div></div></div>`).join(``);
+}
+
+function renderPanel(panel, report, period) {
+  const [key, ...labels] = panel.dataset.config.split(`|`);
+  const metric = metricAt(report, key);
+  switch (panel.dataset.periodPanel) {
+    case `trend`:
+      return trendChart([metric], period);
+    case `finance`:
+      return trendChart([report.revenue, report.expenses], period);
+    case `dist`:
+    case `table`:
+      return distribution(metric, labels, period, panel.dataset.periodPanel === `table`);
+    case `share`: {
+      const share = metric[2][currentFilter === `YTD` ? 4 : period.end];
+      return `<div class="mx-auto my-3 rounded-full w-28 h-28 grid place-items-center" style="background:conic-gradient(var(--theme-accent) ${share}%,var(--theme-chart-track) 0)"><div class="rounded-full w-24 h-24 grid place-items-center chart-core font-headline-md" aria-label="Market share ${periodValue(metric)}">${periodValue(metric)}</div></div><p class="text-xs text-center opacity-80">Share of tracked markets</p>`;
+    }
+    case `milestones`: {
+      const complete = report.metrics[2][2][period.end];
+      return `<p class="text-sm mb-3">${complete} of 14 priority projects ${currentFilter === `Q4` ? `forecast to close` : `completed`}</p><div class="grid grid-cols-7 gap-2" aria-hidden="true">${Array.from({length:14}, (_, i) => `<span class="h-3 rounded-full ${i < complete ? `chart-fill` : `chart-track`}" ></span>`).join(``)}</div>`;
+    }
+    case `risk`:
+      return `<div class="flex items-start gap-2 py-2"><span class="material-symbols-outlined risk-marker" aria-hidden="true">warning</span><div><p class="text-sm font-semibold">${currentFilter === `YTD` ? `Latest quarter watch item` : currentFilter === `Q4` ? `Forecast dependency` : `Priority watch item`}</p><p class="text-sm mt-1 opacity-90">${report.risks[period.end]}</p></div></div>`;
+    case `brief`:
+      return `<p class="text-sm leading-relaxed">${report.metrics.slice(0, 2).map(m => `${m[0]}: <strong>${periodValue(m)}</strong>`).join(` · `)}.</p><p class="mt-2 text-sm opacity-90">${report.risks[period.end]}</p>`;
+  }
+}
+
+function renderPeriodReport() {
+  const period = PERIODS[currentFilter];
+  const report = REPORT[currentSection];
+  const section = document.getElementById(`section-${currentSection}`);
+  document.getElementById(`period-context`).textContent = period.context;
+  document.querySelectorAll(`[data-period]`).forEach(button => {
+    const active = button.dataset.period === currentFilter;
+    button.classList.toggle(`active`, active);
+    button.setAttribute(`aria-pressed`, String(active));
+  });
+  section.querySelectorAll(`[data-period-label]`).forEach(label => label.textContent = period.label);
+  section.querySelectorAll(`[data-period-summary]`).forEach(summary => {
+    summary.textContent = periodValue(report.metrics[Number(summary.dataset.periodSummary)]);
+  });
+  section.querySelectorAll(`[data-period-kpi]`).forEach(card => {
+    const metric = report.metrics[Number(card.dataset.periodKpi)];
+    card.querySelector(`.period-kpi-label`).textContent = metric[0];
+    card.querySelector(`.period-kpi-value`).textContent = periodValue(metric);
+    card.querySelector(`.period-kpi-context`).textContent = period.label;
+  });
+  section.querySelectorAll(`[data-period-panel]`).forEach(panel => {
+    panel.querySelector(`.period-panel-body`).innerHTML = renderPanel(panel, report, period);
+  });
+}
+
+function buildNotifications() {
+  const period = PERIODS[currentFilter];
+  document.getElementById(`notif-list`).innerHTML = Object.entries(REPORT).map(([id, report]) => `
+    <button type="button" class="w-full text-left px-4 py-3 border-b border-slate-200" onclick="showSection('${id}'); closeNotif()">
+      <span class="block text-xs font-semibold">${document.getElementById(`nav-${id}`).dataset.label}</span>
+      <span class="block text-xs mt-1">${report.risks[period.end]}</span>
+    </button>
+  `).join(``);
+  document.getElementById(`notif-count`).textContent = notifRead ? `All read` : `${period.label} · 10 watch items`;
+  document.getElementById(`notif-badge`).style.display = notifRead ? `none` : ``;
+}
+
+// ── Sidebar collapse ───────────────────────────────────────────────────────
+function toggleSidebar() {
+  sidebarCollapsed = !sidebarCollapsed;
+  document.getElementById('sidebar').classList.toggle('collapsed', sidebarCollapsed);
+}
+
+// ── Dark mode ──────────────────────────────────────────────────────────────
+function toggleDark() {
+  darkMode = !darkMode;
+  document.documentElement.classList.toggle('dark', darkMode);
+  document.getElementById('dark-icon').textContent = darkMode ? 'light_mode' : 'dark_mode';
+}
+
+// ── Notifications ──────────────────────────────────────────────────────────
+function toggleNotif() {
+  notifOpen = !notifOpen;
+  document.getElementById('notif-panel').classList.toggle('open', notifOpen);
+  document.querySelector('[aria-controls=notif-panel]').setAttribute('aria-expanded', String(notifOpen));
+  if (notifOpen && !notifRead) buildNotifications();
+}
+
+function closeNotif() {
+  notifOpen = false;
+  document.getElementById('notif-panel').classList.remove('open');
+  document.querySelector('[aria-controls=notif-panel]').setAttribute('aria-expanded', 'false');
+}
+
+function clearNotifs() {
+  document.getElementById('notif-badge').style.display = 'none';
+  document.getElementById('notif-count').textContent = 'All read';
+  notifRead = true;
+}
+
+// ── Search ─────────────────────────────────────────────────────────────────
+const SEARCH_ITEMS = [
+  { id:'marketing', label:'Marketing & Sales', sub:'Revenue, Market Share, Campaigns', icon:'campaign' },
+  { id:'gm', label:'GM Office', sub:'EBITDA, Strategic Projects, Risk', icon:'business_center' },
+  { id:'operations', label:'Operations', sub:'OEE, Manufacturing, Supply Chain', icon:'precision_manufacturing' },
+  { id:'finance', label:'Finance', sub:'Revenue, OPEX, Cash Flow', icon:'payments' },
+  { id:'hr', label:'HR', sub:'Headcount, Retention, Engagement', icon:'groups_3' },
+  { id:'quality_ops', label:'Quality Operations', sub:'Batch Release, Cycle Time, Defects', icon:'fact_check' },
+  { id:'scientific', label:'Scientific Affairs', sub:'Studies, Publications, Pipeline', icon:'science' },
+  { id:'quality_comp', label:'Quality Compliance', sub:'Audit Score, SOPs, CAPA', icon:'verified_user' },
+  { id:'bd', label:'BD & Licenses', sub:'Deals, Pipeline, ROI', icon:'handshake' },
+  { id:'it', label:'IT Department', sub:'Uptime, Tickets, Security, Cloud', icon:'terminal' },
+];
+
+function openSearch() {
+  document.getElementById('search-overlay').classList.add('open');
+  setTimeout(() => document.getElementById('search-input').focus(), 100);
+  doSearch('');
+}
+
+function closeSearch(e) {
+  if (e.target === document.getElementById('search-overlay')) {
+    document.getElementById('search-overlay').classList.remove('open');
+    document.getElementById('search-input').value = '';
+  }
+}
+
+function doSearch(q) {
+  const results = document.getElementById('search-results');
+  const filtered = q.trim() === '' ? SEARCH_ITEMS :
+    SEARCH_ITEMS.filter(i => i.label.toLowerCase().includes(q.toLowerCase()) ||
+                              i.sub.toLowerCase().includes(q.toLowerCase()) ||
+                              REPORT[i.id].metrics.some(metric => metric[0].toLowerCase().includes(q.toLowerCase())));
+
+  results.innerHTML = `<p class="text-xs text-slate-400 px-4 py-2 font-semibold uppercase tracking-wider">
+    ${q ? `Results for "${escapeMarkup(q)}"` : `All Sections`}</p>` +
+    (filtered.length === 0 ? '<p class="text-sm text-slate-400 px-4 py-6 text-center">No results found</p>' :
+    filtered.map(i => `
+      <button type="button" class="search-result-item w-full text-left" onclick="searchGo('${i.id}')">
+        <div class="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0">
+          <span class="material-symbols-outlined text-[#099999]" style="font-size:16px">${i.icon}</span>
+        </div>
+        <div>
+          <p class="font-semibold text-slate-800" style="font-size:13px">${i.label}</p>
+          <p class="text-[11px] text-slate-400">${i.sub}</p>
+        </div>
+      </button>
+    `).join(''));
+}
+
+function searchGo(id) {
+  document.getElementById('search-overlay').classList.remove('open');
+  document.getElementById('search-input').value = '';
+  showSection(id);
+}
+
+// ── Keyboard shortcuts ─────────────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if ((e.metaKey || e.ctrlKey) && e.key === 'k' && !document.getElementById(`action-dialog`).open) {
+    e.preventDefault();
+    openSearch();
+  }
+  if (e.key === 'Escape') {
+    document.getElementById('search-overlay').classList.remove('open');
+    closeNotif();
+    toggleMobileMenu(false);
+  }
+});
+
+// ── Close panels on outside click ─────────────────────────────────────────
+document.addEventListener('click', e => {
+  const panel = document.getElementById('notif-panel');
+  const btn = e.target.closest('[onclick="toggleNotif()"]');
+  if (!panel.contains(e.target) && !btn && notifOpen) closeNotif();
+});
+
+const DRAFT_TYPES = {
+  strategy: { title: `New Strategy`, section: `marketing`, field: `Strategy name`, detail: `Objective and next step` },
+  deal: { title: `New Deal Entry`, section: `bd`, field: `Deal or partner name`, detail: `Opportunity and next step` },
+};
+const DRAFT_KEY = `dad-executive-demo-drafts-v1`;
+let memoryDrafts = [];
+let draftStorageAvailable = true;
+
+function escapeMarkup(value) {
+  return String(value).replace(/[&<>"']/g, character => ({
+    '&': `&amp;`, '<': `&lt;`, '>': `&gt;`, '"': `&quot;`, "'": `&#39;`,
+  })[character]);
+}
+
+function readDrafts() {
+  if (!draftStorageAvailable) return memoryDrafts;
+  try {
+    const saved = JSON.parse(localStorage.getItem(DRAFT_KEY) || `[]`);
+    if (Array.isArray(saved)) memoryDrafts = saved;
+  } catch {
+    draftStorageAvailable = false;
+  }
+  return memoryDrafts;
+}
+
+function writeDrafts(drafts) {
+  memoryDrafts = drafts;
+  try {
+    localStorage.setItem(DRAFT_KEY, JSON.stringify(drafts));
+    draftStorageAvailable = true;
+  } catch {
+    draftStorageAvailable = false;
+  }
+}
+
+function openActionDialog(title, message, body) {
+  closeNotif();
+  const dialog = document.getElementById(`action-dialog`);
+  document.getElementById(`action-title`).textContent = title;
+  document.getElementById(`action-description`).textContent = message;
+  document.getElementById(`action-body`).innerHTML = body;
+  if (!dialog.open) dialog.showModal();
+  document.getElementById(`action-title`).focus();
+}
+
+function closeActionDialog() {
+  document.getElementById(`action-dialog`).close();
+}
+
+function openDraft(kind, notice = ``, periodKey = currentFilter) {
+  if (!Object.hasOwn(DRAFT_TYPES, kind)) return;
+  const type = DRAFT_TYPES[kind];
+  const storedDrafts = readDrafts();
+  const drafts = storedDrafts.filter(draft => draft.kind === kind && draft.period === periodKey);
+  openActionDialog(type.title, `${PERIODS[periodKey].label} · Demo workspace`, `
+    <form id="draft-form" data-kind="${kind}" data-draft-period="${periodKey}" class="action-stack">
+      <label for="draft-name">${type.field}</label>
+      <input id="draft-name" name="name" required maxlength="100" />
+      <label for="draft-detail">${type.detail}</label>
+      <textarea id="draft-detail" name="detail" required maxlength="800" rows="3"></textarea>
+      <button type="submit" class="action-primary">Save Draft</button>
+    </form>
+    <p class="action-message" role="status">${escapeMarkup(notice)}</p>
+    <h3 class="action-subtitle">Saved drafts (${drafts.length})</h3>
+    ${drafts.length ? `<ul class="action-stack">${drafts.map(draft => `
+      <li class="action-list-item"><strong>${escapeMarkup(draft.name)}</strong><p>${escapeMarkup(draft.detail)}</p>
+        <button type="button" data-remove-draft="${escapeMarkup(draft.id)}" class="action-link">Delete draft</button></li>
+    `).join(``)}</ul>` : `<p>No drafts for this period.</p>`}`);
+}
+
+function submitDraft(event) {
+  if (event.target.id !== `draft-form`) return;
+  event.preventDefault();
+  const data = new FormData(event.target);
+  const name = data.get(`name`).trim();
+  const detail = data.get(`detail`).trim();
+  const kind = event.target.dataset.kind;
+  const period = event.target.dataset.draftPeriod;
+  if (!name || !detail) {
+    document.querySelector(`.action-message`).textContent = `Enter a name and a description.`;
+    return;
+  }
+  const id = typeof crypto.randomUUID === `function` ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`;
+  writeDrafts([...readDrafts(), {id, kind, period, name, detail}]);
+  openDraft(kind, draftStorageAvailable ? `Draft saved on this browser.` : `Draft saved for this session.`, period);
+}
+
+function csvCell(value) {
+  const raw = String(value);
+  const safe = /^[\s]*[=+@-]/.test(raw) ? `'${raw}` : raw;
+  return `"${safe.replaceAll('"', '""')}"`;
+}
+
+function downloadCsv() {
+  const section = document.getElementById(`section-${currentSection}`);
+  const title = SEARCH_ITEMS.find(item => item.id === currentSection).label;
+  const report = REPORT[currentSection];
+  const rows = [
+    [`Section`, `Period`, `Data type`, `Category`, `Item`, `Value`],
+    ...report.metrics.map(metric => [title, PERIODS[currentFilter].label, `Demo Data`, `KPI`, metric[0], periodValue(metric)]),
+    ...Array.from(section.querySelectorAll(`[data-period-panel]`), panel => [
+      title, PERIODS[currentFilter].label, `Demo Data`, `Section detail`, panel.querySelector(`h3`).textContent,
+      panel.querySelector(`.period-panel-body`).innerText.trim(),
+    ]),
+  ];
+  const csv = rows.map(row => row.map(csvCell).join(`,`)).join(`\r\n`);
+  const url = URL.createObjectURL(new Blob([`\uFEFF`, csv], {type: `text/csv;charset=utf-8`}));
+  const link = document.createElement(`a`);
+  link.href = url;
+  link.download = `DAD-${currentSection}-${currentFilter}-2026.csv`;
+  document.body.append(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function reportPreview() {
+  const label = SEARCH_ITEMS.find(item => item.id === currentSection).label;
+  const report = REPORT[currentSection];
+  const risk = report.risks[PERIODS[currentFilter].end];
+  openActionDialog(`${label} Report`, `${PERIODS[currentFilter].context} · Demo Data`, `
+    <dl class="action-stack">${report.metrics.map(metric => `<div class="action-list-item"><dt>${metric[0]}</dt><dd><strong>${periodValue(metric)}</strong></dd></div>`).join(``)}</dl>
+    <p class="action-list-item"><strong>Watch item</strong><br>${risk}</p>
+    <div class="action-controls"><button type="button" class="action-primary" data-action="print">Print / Save PDF</button>
+    <button type="button" class="action-secondary" data-action="csv">Download CSV</button></div>`);
+}
+
+function runAction(action) {
+  switch (action) {
+    case `report`: reportPreview(); break;
+    case `print`: closeActionDialog(); window.print(); break;
+    case `csv`: downloadCsv(); break;
+    case `strategy`:
+    case `deal`: openDraft(action); break;
+    case `support`:
+      openActionDialog(`Dashboard Help`, `Dar Al Dawa Executive Dashboard`, `
+        <ul class="action-stack action-help">
+          <li>Use the navigation menu to switch between departments.</li>
+          <li>Select a period to refresh the report. YTD covers January to September 2026.</li>
+          <li>Use Ctrl+K or ⌘K to find a department or metric.</li>
+          <li>Export the active department as CSV or use the print dialog to save a PDF.</li>
+          <li>Strategies and deals are demo drafts stored in this browser when local storage is available.</li>
+        </ul>`);
+      break;
+    case `status`:
+      readDrafts();
+      openActionDialog(`System Status`, `This dashboard uses an embedded demo dataset.`, `
+        <dl class="action-stack">
+          <div class="action-list-item"><dt>Dataset</dt><dd>Demo Data · 2026</dd></div>
+          <div class="action-list-item"><dt>Active period</dt><dd>${PERIODS[currentFilter].context}</dd></div>
+          <div class="action-list-item"><dt>Departments</dt><dd>${Object.keys(REPORT).length} available</dd></div>
+          <div class="action-list-item"><dt>Draft storage</dt><dd>${draftStorageAvailable ? `Browser storage enabled` : `Session memory only`}</dd></div>
+        </dl>`);
+      break;
+    case `quick`:
+      openActionDialog(`Quick Actions`, PERIODS[currentFilter].label, `
+        <div class="action-stack">
+          <button type="button" class="action-secondary" data-action="report">Export Current Report</button>
+          <button type="button" class="action-secondary" data-action="strategy">New Strategy</button>
+          <button type="button" class="action-secondary" data-action="deal">New Deal Entry</button>
+        </div>`);
+      break;
+  }
+}
+
+document.addEventListener(`submit`, submitDraft);
+document.addEventListener(`click`, event => {
+  const control = event.target.closest(`[data-action], [data-remove-draft]`);
+  if (!control) return;
+  if (control.hasAttribute(`data-remove-draft`)) {
+    const {kind, draftPeriod} = document.getElementById(`draft-form`).dataset;
+    writeDrafts(readDrafts().filter(draft => draft.id !== control.dataset.removeDraft));
+    openDraft(kind, `Draft deleted.`, draftPeriod);
+    return;
+  }
+  if (control.dataset.action === `close`) closeActionDialog();
+  else runAction(control.dataset.action);
+});
+
+function toggleMobileMenu(open = !document.body.classList.contains(`nav-open`)) {
+  const menu = document.getElementById(`mobile-menu`);
+  const wasOpen = menu.getAttribute(`aria-expanded`) === `true`;
+  document.body.classList.toggle(`nav-open`, open);
+  menu.setAttribute(`aria-expanded`, String(open));
+  if (open) document.querySelector(`#sidebar [aria-current]`).focus();
+  if (!open && wasOpen) menu.focus();
+}
+
+document.addEventListener(`DOMContentLoaded`, () => {
+  renderPeriodReport();
+  buildNotifications();
+});
+</script>
+<dialog id="action-dialog" aria-labelledby="action-title" aria-describedby="action-description">
+  <div class="action-heading"><div><h2 id="action-title" tabindex="-1"></h2><p id="action-description"></p></div>
+  <button type="button" data-action="close" class="action-close" aria-label="Close dialog"><span class="material-symbols-outlined" aria-hidden="true">close</span></button></div>
+  <div id="action-body"></div>
+</dialog></body>
+</html>
