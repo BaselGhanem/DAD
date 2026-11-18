@@ -3,7 +3,7 @@ import {
   statement, bridge, financials, intercompany, fyRows, workingCapital, cashSchedule, capexProjects, reportWindows, periodFinancials, cashForPeriods,
 } from "./model.js?v=aligned";
 import {executivePdf} from "./executive-pdf.js?v=3";
-import {explanations} from "./help.js?v=1";
+import {explanations} from "./help.js?v=2";
 
 const views = {
   overview:[`Executive Overview`,`dashboard`,`Profitability, liquidity and priorities at a glance.`],
@@ -189,14 +189,10 @@ function inventoryRows(d){
   });
 }
 function working(d){
-  const debt=[
-    [`Current`,d.wc.ar*.52],[`1–30 days`,d.wc.ar*.16],[`31–60 days`,d.wc.ar*.10],[`61–90 days`,d.wc.ar*.13],[`90+ days`,d.wc.ar*.09],
-  ];
   const overdue=d.wc.ar*.22;
   return `<div class="details">
   ${state.market?noMarket(`Cash conversion cycle`):panel(`ccc`,`Cash conversion cycle`,table(`Cash conversion cycle`,[plain(`Metric`),dayColumn(currentLabel()),dayColumn(references[state.compare])],[`dso`,`dio`,`dpo`,`ccc`].map(k=>[k.toUpperCase(),d.wc[k],d.baseWC[k]])),`Month-end balances divided by current-month activity × 30`)}
-  ${panel(`aging`,`Accounts receivable aging`,bars(`Receivable aging`,debt),`Aged by days past due · ${currency()}`)}
-  ${panel(`overdue`,`Largest overdue customers`,table(`Overdue customers`,[plain(`Account`),money(`Past due >60 days`)],merchants.map((name,i)=>[name,overdue*[.34,.27,.22,.17][i]])),`Reconciles to the 61+ day buckets`)}
+  ${panel(`overdue`,`Largest overdue customers`,table(`Overdue customers`,[plain(`Account`),money(`Past due >60 days`)],merchants.map((name,i)=>[name,overdue*[.34,.27,.22,.17][i]])),`Balances more than 60 days past due`)}
   ${panel(`suppliers`,`Supplier obligations`,table(`Supplier obligations`,[plain(`Payment window`),money(`Payables`)],[[`Next 7 days`,d.wc.ap*.22],[`8–30 days`,d.wc.ap*.39],[`31–60 days`,d.wc.ap*.27],[`Later`,d.wc.ap*.12]]),`Open amounts by due window · ${currency()}`)}
   ${panel(`stockHealth`,`Inventory health`,table(`Inventory health`,[plain(`Product`),money(`Stock value`),money(`Slow-moving`),money(`Expires in 90 days`)],inventoryRows(d),true),`Risk categories can overlap · ${currency()}`,true)}</div>`;
 }

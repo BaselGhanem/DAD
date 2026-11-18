@@ -170,9 +170,6 @@ function spend(d){
   });
   return `<div class="details cco-details">
     ${panel(`A&P Spend`,summaryTable(categories.map(([name,rate])=>[name,dollars(m.netUsd*rate),pct(rate)]),[`Category`,`Spend (USD)`,`% of net sales`]),`Total ${dollars(total)} · ${pct(div(total,m.netUsd))} of net sales`)}
-    ${panel(`Promotional ROI`,summaryTable([[
-      dollars(m.grossProfit*.27),dollars(total),pct(div(m.grossProfit*.27-total,total)),
-    ]],[`Attributed gross profit`,`A&P spend`,`Net ROI`]),`ROI = (attributed gross profit − A&P spend) ÷ spend`)}
     ${panel(`Bonuses, Rebates & Discount Effect`,summaryTable([
       [`Discounts & rebates`,dollars(m.discounts)], [`Bonus units`,number(m.bonusUnits)],
       [`Net selling price / unit`,m.actualUnits?dollars(m.netUsd/m.actualUnits,2):`—`],
