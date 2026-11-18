@@ -520,6 +520,18 @@ html :is(button, a, input, textarea):focus-visible { outline-color: var(--theme-
   html .text-white .risk-marker { color: var(--theme-warning); }
 }
 
+
+.ceo-market-filter{display:flex;align-items:center;gap:10px;font-size:.83rem;font-weight:600}
+.ceo-market-filter select{max-width:100%;color:var(--theme-text);background:var(--theme-surface);border:1px solid var(--theme-border);border-radius:999px;padding:6px 30px 6px 12px}
+.exec-ranking{list-style:none;margin:0;padding:0}
+.exec-ranking li{display:flex;justify-content:space-between;gap:8px;padding:7px 0;border-bottom:1px solid var(--theme-border);font-size:.79rem}
+.exec-ranking a,.exec-card-link,.exec-markets summary{color:var(--theme-accent);font-weight:600}
+.exec-ranking a:hover,.exec-card-link:hover{text-decoration:underline}
+.exec-ranking strong{flex-shrink:0;font-variant-numeric:tabular-nums}
+.exec-card-link{display:block;margin-top:4px}
+.exec-markets{margin-top:8px;font-size:.8rem}
+.exec-markets summary{cursor:pointer}
+[data-action="report"]:disabled{opacity:.55}
 </style>
 </head>
 
@@ -631,14 +643,14 @@ html :is(button, a, input, textarea):focus-visible { outline-color: var(--theme-
         <div class="w-8 h-8 rounded-full bg-[#099999] flex items-center justify-center text-white text-xs font-bold ring-2 ring-white shadow">GM</div>
         <div class="hidden md:block">
           <p class="text-xs font-bold text-slate-700 leading-none">Gen. Manager</p>
-          <p class="text-[10px] text-slate-400">MENA Region</p>
+          <p class="text-[10px] text-slate-400">Group Executive Office</p>
         </div>
       </div>
 
       <!-- Export -->
       <button class="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#099999] text-white text-xs font-semibold hover:bg-[#163d80] transition-colors shadow-md shadow-blue-900/20" data-action="report" type="button">
         <span class="material-symbols-outlined" style="font-size:15px">file_download</span>
-        Export
+        Executive PDF
       </button>
     </div>
   </header>
@@ -684,12 +696,12 @@ html :is(button, a, input, textarea):focus-visible { outline-color: var(--theme-
 <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
 <div>
 <h1 class="text-headline-xl font-headline-xl text-on-background">Marketing &amp; Sales Dashboard</h1>
-<p class="text-body-lg text-on-surface-variant max-w-2xl mt-2">Tracking global market penetration and sales growth across therapeutic classes.</p>
+<p class="text-body-lg text-on-surface-variant max-w-2xl mt-2">Net revenue, performance against budget, and sales by market and product.</p>
 </div>
 <div class="flex space-x-3">
 <button class="px-4 py-2 border border-[#099999] text-[#099999] rounded-lg font-medium hover:bg-blue-50 transition-colors flex items-center" data-action="report" type="button">
 <span class="material-symbols-outlined mr-2 text-[20px]" data-icon="file_download">file_download</span>
-                            Export Report
+                            Executive PDF
                         </button>
 <button class="px-4 py-2 bg-primary text-on-primary rounded-lg font-medium shadow-lg shadow-primary/20 hover:opacity-90 transition-opacity flex items-center" data-action="strategy" type="button">
 <span class="material-symbols-outlined mr-2 text-[20px]" data-icon="add_chart">add_chart</span>
@@ -704,12 +716,13 @@ html :is(button, a, input, textarea):focus-visible { outline-color: var(--theme-
 <div class="glass-panel p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow" data-period-kpi="2"><span class="material-symbols-outlined text-[#099999] bg-teal-50 rounded-lg p-2 mb-3 self-start" aria-hidden="true">group_add</span><p class="period-kpi-label text-label-md text-slate-500"></p><p class="period-kpi-value text-display-lg font-display-lg text-[#099999] mt-1"></p><p class="period-kpi-context text-xs text-slate-500 mt-2"></p></div>
 <div class="glass-panel p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow" data-period-kpi="3"><span class="material-symbols-outlined text-[#099999] bg-teal-50 rounded-lg p-2 mb-3 self-start" aria-hidden="true">show_chart</span><p class="period-kpi-label text-label-md text-slate-500"></p><p class="period-kpi-value text-display-lg font-display-lg text-[#099999] mt-1"></p><p class="period-kpi-context text-xs text-slate-500 mt-2"></p></div>
 </div>
+<label class="ceo-market-filter">Market <select id="ceo-market" aria-label="Market"></select></label>
 <!-- Visualization Layer -->
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
 <!-- Sales Trend Line Chart Mockup -->
 <div class="lg:col-span-2 glass-panel p-8 rounded-2xl period-panel p-5 md:p-6" data-period-panel="trend" data-config="0"><h3 class="text-headline-md font-headline-md mb-3">Sales Trend Analysis</h3><div class="period-panel-body"></div></div>
 <!-- Market Share Donut Chart Mockup -->
-<div class="glass-panel p-8 rounded-2xl flex flex-col period-panel p-5 md:p-6" data-period-panel="share" data-config="1"><h3 class="text-headline-md font-headline-md mb-3">Market Breakdown</h3><div class="period-panel-body"></div></div>
+<div class="glass-panel p-8 rounded-2xl flex flex-col period-panel p-5 md:p-6" data-period-panel="markets" data-config=""><h3 class="text-headline-md font-headline-md mb-3">Sales by Market</h3><div class="period-panel-body"></div></div>
 </div>
 <!-- Insights & Risks Grid -->
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -719,7 +732,7 @@ html :is(button, a, input, textarea):focus-visible { outline-color: var(--theme-
 <div class="glass-panel p-8 rounded-2xl period-panel p-5 md:p-6" data-period-panel="risk" data-config=""><h3 class="text-headline-md font-headline-md mb-3">Alerts / Risks</h3><div class="period-panel-body"></div></div>
 </div>
 <!-- Regional Comparison Section -->
-<div class="glass-panel p-8 rounded-2xl period-panel p-5 md:p-6" data-period-panel="dist" data-config="0|GCC|North Africa|Levant|Other Markets"><h3 class="text-headline-md font-headline-md mb-3">Regional Sales Comparison</h3><div class="period-panel-body"></div></div>
+<div class="glass-panel p-8 rounded-2xl period-panel p-5 md:p-6" data-period-panel="products" data-config=""><h3 class="text-headline-md font-headline-md mb-3">Product Performance</h3><div class="period-panel-body"></div></div>
 </div>
 <!-- Dashboard Footer -->
     </div>
@@ -825,7 +838,7 @@ html :is(button, a, input, textarea):focus-visible { outline-color: var(--theme-
 <div class="flex-1 overflow-y-auto p-margin custom-scrollbar bg-[#F4F6F6]">
 <div class="max-w-[1600px] mx-auto space-y-gutter">
 <!-- KPI Hero Section -->
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-gutter">
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-gutter">
 <!-- KPI Card 1 -->
 <div class="glass-panel p-md rounded-2xl shadow-sm hover:shadow-md transition-shadow" data-period-kpi="0"><span class="material-symbols-outlined text-[#099999] bg-teal-50 rounded-lg p-2 mb-3 self-start" aria-hidden="true">account_balance_wallet</span><p class="period-kpi-label text-label-md text-slate-500"></p><p class="period-kpi-value text-display-lg font-display-lg text-[#099999] mt-1"></p><p class="period-kpi-context text-xs text-slate-500 mt-2"></p></div>
 <!-- KPI Card 2 -->
@@ -834,6 +847,7 @@ html :is(button, a, input, textarea):focus-visible { outline-color: var(--theme-
 <div class="glass-panel p-md rounded-2xl shadow-sm hover:shadow-md transition-shadow" data-period-kpi="2"><span class="material-symbols-outlined text-[#099999] bg-teal-50 rounded-lg p-2 mb-3 self-start" aria-hidden="true">payments</span><p class="period-kpi-label text-label-md text-slate-500"></p><p class="period-kpi-value text-display-lg font-display-lg text-[#099999] mt-1"></p><p class="period-kpi-context text-xs text-slate-500 mt-2"></p></div>
 <!-- KPI Card 4 -->
 <div class="glass-panel p-md rounded-2xl shadow-sm hover:shadow-md transition-shadow" data-period-kpi="3"><span class="material-symbols-outlined text-[#099999] bg-teal-50 rounded-lg p-2 mb-3 self-start" aria-hidden="true">analytics</span><p class="period-kpi-label text-label-md text-slate-500"></p><p class="period-kpi-value text-display-lg font-display-lg text-[#099999] mt-1"></p><p class="period-kpi-context text-xs text-slate-500 mt-2"></p></div>
+<div class="glass-panel p-md rounded-2xl shadow-sm hover:shadow-md transition-shadow" data-period-kpi="4"><span class="material-symbols-outlined text-[#099999] bg-teal-50 rounded-lg p-2 mb-3 self-start" aria-hidden="true">analytics</span><p class="period-kpi-label text-label-md text-slate-500"></p><p class="period-kpi-value text-display-lg font-display-lg text-[#099999] mt-1"></p><p class="period-kpi-context text-xs text-slate-500 mt-2"></p></div>
 </div>
 <!-- Bento Grid Content -->
 <div class="grid grid-cols-12 gap-gutter">
@@ -842,11 +856,11 @@ html :is(button, a, input, textarea):focus-visible { outline-color: var(--theme-
 <!-- Alerts / Risks Panel -->
 <div class="col-span-12 lg:col-span-4 glass-panel rounded-2xl p-md shadow-sm period-panel p-5 md:p-6" data-period-panel="risk" data-config=""><h3 class="text-headline-md font-headline-md mb-3">Alerts &amp; Risks</h3><div class="period-panel-body"></div></div>
 <!-- Departmental Spend Bar Chart -->
-<div class="col-span-12 lg:col-span-6 glass-panel rounded-2xl p-md shadow-sm period-panel p-5 md:p-6" data-period-panel="dist" data-config="expenses|Operations|Commercial|R&amp;D|Administration"><h3 class="text-headline-md font-headline-md mb-3">Departmental Spend</h3><div class="period-panel-body"></div></div>
+<div class="col-span-12 lg:col-span-6 glass-panel rounded-2xl p-md shadow-sm period-panel p-5 md:p-6" data-period-panel="finance-breakdown" data-config="spend"><h3 class="text-headline-md font-headline-md mb-3">Departmental Spend</h3><div class="period-panel-body"></div></div>
 <!-- Cost Distribution Donut Chart -->
-<div class="col-span-12 lg:col-span-6 glass-panel rounded-2xl p-md shadow-sm period-panel p-5 md:p-6" data-period-panel="dist" data-config="expenses|Payroll|Materials|Logistics|Other"><h3 class="text-headline-md font-headline-md mb-3">Cost Distribution</h3><div class="period-panel-body"></div></div>
+<div class="col-span-12 lg:col-span-6 glass-panel rounded-2xl p-md shadow-sm period-panel p-5 md:p-6" data-period-panel="finance-breakdown" data-config="costs"><h3 class="text-headline-md font-headline-md mb-3">Cost Distribution</h3><div class="period-panel-body"></div></div>
 <!-- Executive Insights Panel (Full Width) -->
-<div class="col-span-12 glass-panel rounded-2xl p-md shadow-sm period-panel p-5 md:p-6" data-period-panel="brief" data-config=""><h3 class="text-headline-md font-headline-md mb-3">Executive Insights</h3><div class="period-panel-body"></div></div>
+<div class="col-span-12 glass-panel rounded-2xl p-md shadow-sm period-panel p-5 md:p-6" data-period-panel="finance-compare" data-config=""><h3 class="text-headline-md font-headline-md mb-3">Performance vs Budget</h3><div class="period-panel-body"></div></div>
 </div>
 </div>
 </div>
@@ -1148,12 +1162,7 @@ const QUARTERS = [`Q1`, `Q2`, `Q3`, `Q4`];
 // Each series lists the four quarters followed by the closed-period YTD value.
 const REPORT = {
   marketing: {
-    metrics: [
-      [`Total Revenue`, `usdM`, [38.2, 40.5, 42.8, 46.1, 121.5]],
-      [`Market Share`, `percent`, [17.1, 17.8, 18.5, 19.2, 18.5]],
-      [`Customer Acquisition Cost`, `usd`, [1380, 1310, 1240, 1190, 1304]],
-      [`Sales Growth YoY`, `percent`, [11.4, 12.1, 14.2, 15.8, 12.6]],
-    ],
+    metrics: [],
     risks: [`Review distributor coverage before the market relaunch.`, `Monitor currency exposure in open distributor orders.`, `Critical supply lag may interrupt replenishment in priority markets.`, `Forecast depends on replenishment ahead of the seasonal sales peak.`],
   },
   gm: {
@@ -1175,14 +1184,7 @@ const REPORT = {
     risks: [`Check raw material buffers before peak production.`, `Review supplier lead times for packaging materials.`, `Escalate the maintenance plan for Line 3.`, `Forecast depends on completing scheduled maintenance.`],
   },
   finance: {
-    metrics: [
-      [`Net Profit Margin`, `percent`, [12.1, 12.8, 12.5, 13.2, 12.5]],
-      [`EBITDA`, `usdM`, [5.8, 6.2, 6.8, 7.4, 18.8]],
-      [`Operating Cash Flow`, `usdM`, [2.8, 3.1, 4.2, 5.1, 10.1]],
-      [`Budget vs Actual`, `percent`, [96.4, 97.1, 98.2, 99.3, 97.3]],
-    ],
-    revenue: [`Revenue`, `usdM`, [38.2, 40.5, 42.8, 46.1, 121.5]],
-    expenses: [`Operating Expenses`, `usdM`, [6.2, 6.5, 6.8, 7.1, 19.5]],
+    metrics: [],
     risks: [`Review early-year collections against the cash plan.`, `Check the impact of freight charges on operating expenses.`, `Monitor exchange-rate exposure before the next settlement.`, `Cash-flow forecast depends on collections from key accounts.`],
   },
   hr: {
@@ -1251,9 +1253,14 @@ let sidebarCollapsed = false;
 let notifOpen = false;
 let notifRead = false;
 
+let financeModel;
+let pdfRenderer;
+let marketScope = ``;
+
 const numberFormat = new Intl.NumberFormat(`en-US`);
 const formats = {
   usdM: v => `$${v.toFixed(1)}M`,
+  usdExactM: v => `$${v.toFixed(2)}M`,
   usd: v => `$${numberFormat.format(v)}`,
   percent: v => `${v.toFixed(1)}%`,
   percent2: v => `${v.toFixed(2)}%`,
@@ -1334,11 +1341,28 @@ function distribution(metric, labels, period, table) {
 function renderPanel(panel, report, period) {
   const [key, ...labels] = panel.dataset.config.split(`|`);
   const metric = metricAt(report, key);
+  const items = (rows, link) => rows.length
+    ? `<ul class="exec-ranking">${rows.map(([label,amount])=>`<li>${link?`<a href="${escapeMarkup(link(label))}">${escapeMarkup(label)}</a>`:`<span>${escapeMarkup(label)}</span>`}<strong>${financeModel.itemAmount(amount)}</strong></li>`).join(``)}</ul>`
+    : `<p class="text-sm">No products below budget.</p>`;
   switch (panel.dataset.periodPanel) {
     case `trend`:
       return trendChart([metric], period);
     case `finance`:
       return trendChart([report.revenue, report.expenses], period);
+    case `markets`: {
+      const ranked=financeModel.marketRanking(currentFilter,marketScope);
+      const link=market=>financeModel.cfoLink(`profit`,currentFilter,{market});
+      return items(ranked.slice(0,5),link)+(ranked.length>5?`<details class="exec-markets"><summary>See all ${ranked.length} markets</summary>${items(ranked,link)}</details>`:``);
+    }
+    case `products`: {
+      const ranked=financeModel.productRankings(currentFilter,marketScope);
+      const link=product=>financeModel.cfoLink(`profit`,currentFilter,{market:marketScope,product});
+      return `<div class="grid grid-cols-1 md:grid-cols-2 gap-6"><div><h4>Top 5 by net revenue</h4>${items(ranked.sales,link)}</div><div><h4>Largest EBITDA declines vs Budget</h4>${items(ranked.downside,link)}</div></div>`;
+    }
+    case `finance-breakdown`:
+      return items(financeModel.financeBreakdown(currentFilter)[key]);
+    case `finance-compare`:
+      return items(financeModel.financeBreakdown(currentFilter).comparison.map(([label,actual,budget])=>[`${label} variance`,actual-budget]));
     case `dist`:
     case `table`:
       return distribution(metric, labels, period, panel.dataset.periodPanel === `table`);
@@ -1357,11 +1381,22 @@ function renderPanel(panel, report, period) {
   }
 }
 
+function periodContext(){
+  if(currentSection===`finance`||currentSection===`marketing`){
+    if(currentFilter===`YTD`)return `Jan–Oct 2026 · Actuals`;
+    if(currentFilter===`Q4`)return `Oct actual + Nov–Dec forecast`;
+  }
+  return PERIODS[currentFilter].context;
+}
+const ceoScope=()=>currentSection===`marketing`&&marketScope?`Dar Al Dawa Group / ${marketScope}`:`Dar Al Dawa Group`;
 function renderPeriodReport() {
   const period = PERIODS[currentFilter];
   const report = REPORT[currentSection];
   const section = document.getElementById(`section-${currentSection}`);
-  document.getElementById(`period-context`).textContent = period.context;
+  const isFinancial=currentSection===`marketing`||currentSection===`finance`;
+  const context=isFinancial?periodContext():period.context;
+  document.getElementById(`period-context`).textContent = context;
+  if(!financeModel&&isFinancial)return;
   document.querySelectorAll(`[data-period]`).forEach(button => {
     const active = button.dataset.period === currentFilter;
     button.classList.toggle(`active`, active);
@@ -1375,7 +1410,16 @@ function renderPeriodReport() {
     const metric = report.metrics[Number(card.dataset.periodKpi)];
     card.querySelector(`.period-kpi-label`).textContent = metric[0];
     card.querySelector(`.period-kpi-value`).textContent = periodValue(metric);
-    card.querySelector(`.period-kpi-context`).textContent = period.label;
+    const contextNode=card.querySelector(`.period-kpi-context`);
+    contextNode.textContent=period.label;
+    if(currentSection===`finance`){
+      const key=[`revenue`,`margin`,`ebitda`,`operating`,`closing`][Number(card.dataset.periodKpi)];
+      const link=document.createElement(`a`);
+      link.className=`exec-card-link`;
+      link.href=financeModel.cfoLink(Number(card.dataset.periodKpi)<3?`profit`:`cash`,currentFilter,{metric:key});
+      link.textContent=`Open in CFO`;
+      contextNode.append(link);
+    }
   });
   section.querySelectorAll(`[data-period-panel]`).forEach(panel => {
     panel.querySelector(`.period-panel-body`).innerHTML = renderPanel(panel, report, period);
@@ -1601,10 +1645,10 @@ function downloadCsv() {
   const title = SEARCH_ITEMS.find(item => item.id === currentSection).label;
   const report = REPORT[currentSection];
   const rows = [
-    [`Section`, `Period`, `Category`, `Item`, `Value`],
-    ...report.metrics.map(metric => [title, PERIODS[currentFilter].label, `KPI`, metric[0], periodValue(metric)]),
+    [`Section`, `Period`, `Scope`, `Category`, `Item`, `Value`],
+    ...report.metrics.map(metric => [title, periodContext(), ceoScope(), `KPI`, metric[0], periodValue(metric)]),
     ...Array.from(section.querySelectorAll(`[data-period-panel]`), panel => [
-      title, PERIODS[currentFilter].label, `Section detail`, panel.querySelector(`h3`).textContent,
+      title, periodContext(), ceoScope(), `Section detail`, panel.querySelector(`h3`).textContent,
       panel.querySelector(`.period-panel-body`).innerText.trim(),
     ]),
   ];
@@ -1619,21 +1663,41 @@ function downloadCsv() {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-function reportPreview() {
-  const label = SEARCH_ITEMS.find(item => item.id === currentSection).label;
-  const report = REPORT[currentSection];
-  const risk = report.risks[PERIODS[currentFilter].end];
-  openActionDialog(`${label} Report`, `${PERIODS[currentFilter].context}`, `
-    <dl class="action-stack">${report.metrics.map(metric => `<div class="action-list-item"><dt>${metric[0]}</dt><dd><strong>${periodValue(metric)}</strong></dd></div>`).join(``)}</dl>
-    <p class="action-list-item"><strong>Watch item</strong><br>${risk}</p>
-    <div class="action-controls"><button type="button" class="action-primary" data-action="print">Print / Save PDF</button>
-    <button type="button" class="action-secondary" data-action="csv">Download CSV</button></div>`);
+function downloadExecutivePdf(){
+  if(!pdfRenderer)return;
+  const report=REPORT[currentSection];
+  const sectionName=SEARCH_ITEMS.find(item=>item.id===currentSection).label;
+  const sections=[
+    {title:`${sectionName} KPIs`,columns:[`Metric`,`Value`],rows:report.metrics.map(metric=>[metric[0],periodValue(metric)])},
+    {title:`Executive Watch Item`,columns:[`Category`,`Summary`],rows:[[`Priority`,report.risks[PERIODS[currentFilter].end]]]},
+  ];
+  if(currentSection===`marketing`){
+    const products=financeModel.productRankings(currentFilter,marketScope);
+    sections.push(
+      {title:`Sales by Market`,columns:[`Market`,`Net revenue`],rows:financeModel.marketRanking(currentFilter,marketScope).map(([label,value])=>[label,financeModel.itemAmount(value)])},
+      {title:`Top Products by Net Revenue`,columns:[`Product`,`Net revenue`],rows:products.sales.map(([label,value])=>[label,financeModel.itemAmount(value)])},
+      {title:`Largest EBITDA Declines vs Budget`,columns:[`Product`,`EBITDA variance`],rows:products.downside.length?products.downside.map(([label,value])=>[label,financeModel.itemAmount(value)]):[[`No products below budget`,`-`]]},
+    );
+  }
+  if(currentSection===`finance`){
+    sections.push({title:`Performance vs Budget`,columns:[`Metric`,currentFilter===`Q4`?`Outlook / Budget`:`Actual / Budget`],rows:financeModel.financeBreakdown(currentFilter).comparison.map(([label,actual,budget])=>[label,`${financeModel.itemAmount(actual)} / ${financeModel.itemAmount(budget)}`])});
+  }
+  const bytes=pdfRenderer({
+    role:`CEO`,period:periodContext(),scope:ceoScope(),currency:currentSection===`marketing`||currentSection===`finance`?`USD`:``,
+  },sections);
+  const url=URL.createObjectURL(new Blob([bytes],{type:`application/pdf`}));
+  const link=document.createElement(`a`);
+  link.href=url;
+  link.download=`DAD-CEO-${currentSection}-${currentFilter}-2026.pdf`;
+  document.body.append(link);
+  link.click();
+  link.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
 
 function runAction(action) {
   switch (action) {
-    case `report`: reportPreview(); break;
-    case `print`: closeActionDialog(); window.print(); break;
+    case `report`: downloadExecutivePdf(); break;
     case `csv`: downloadCsv(); break;
     case `strategy`:
     case `deal`: openDraft(action); break;
@@ -1643,7 +1707,7 @@ function runAction(action) {
           <li>Use the navigation menu to switch between departments.</li>
           <li>Select a period to refresh the report. YTD covers January to September 2026.</li>
           <li>Use Ctrl+K or ⌘K to find a department or metric.</li>
-          <li>Export the active department as CSV or use the print dialog to save a PDF.</li>
+          <li>Download an Executive PDF or export the active department as CSV from Quick Actions.</li>
           <li>Strategies and deals are drafts stored in this browser when local storage is available.</li>
         </ul>`);
       break;
@@ -1660,7 +1724,8 @@ function runAction(action) {
     case `quick`:
       openActionDialog(`Quick Actions`, PERIODS[currentFilter].label, `
         <div class="action-stack">
-          <button type="button" class="action-secondary" data-action="report">Export Current Report</button>
+          <button type="button" class="action-secondary" data-action="report">Executive PDF</button>
+          <button type="button" class="action-secondary" data-action="csv">Download CSV</button>
           <button type="button" class="action-secondary" data-action="strategy">New Strategy</button>
           <button type="button" class="action-secondary" data-action="deal">New Deal Entry</button>
         </div>`);
@@ -1691,9 +1756,30 @@ function toggleMobileMenu(open = !document.body.classList.contains(`nav-open`)) 
   if (!open && wasOpen) menu.focus();
 }
 
-document.addEventListener(`DOMContentLoaded`, () => {
-  renderPeriodReport();
+document.addEventListener(`DOMContentLoaded`, async () => {
   buildNotifications();
+  try{
+    const buttonSelector=`[data-action="report"]`;
+    document.querySelectorAll(buttonSelector).forEach(button=>button.disabled=true);
+    const [model,{executivePdf}]=await Promise.all([
+      import(`./finance.js?v=aligned`),import(`../CFO/executive-pdf.js?v=3`),
+    ]);
+    financeModel=model;
+    pdfRenderer=executivePdf;
+    Object.assign(REPORT.finance,financeModel.financeSeries());
+    REPORT.marketing.metrics=financeModel.salesSeries(marketScope);
+    const select=document.getElementById(`ceo-market`);
+    select.innerHTML=`<option value="">All markets</option>`+financeModel.markets.map(name=>`<option>${escapeMarkup(name)}</option>`).join(``);
+    select.addEventListener(`change`,()=>{
+      marketScope=select.value;
+      REPORT.marketing.metrics=financeModel.salesSeries(marketScope);
+      renderPeriodReport();
+    });
+    renderPeriodReport();
+    document.querySelectorAll(buttonSelector).forEach(button=>button.disabled=false);
+  }catch{
+    document.getElementById(`period-context`).textContent=`Financial data could not load. Reload to retry.`;
+  }
 });
 </script>
 <dialog id="action-dialog" aria-labelledby="action-title" aria-describedby="action-description">

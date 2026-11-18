@@ -140,7 +140,7 @@ export function tradeRows(scope, periods, reference = `actual`) {
   const rules = assumptions[reference];
   return scopeEntities(scope).flatMap((entity)=>periods.flatMap(month=>entity.markets.flatMap(([market, share])=>{
     if (scope.market && market !== scope.market) return [];
-    return products.map(product=>{
+    return (scope.product?products.filter(product=>product.name===scope.product):products).map(product=>{
       const seasonal = 1 + month*.019 + [0,.025,-.018,.012][month%4];
       const quantity = 290000 * entity.size * share * product.share * seasonal * rules.volume * rules.mix[product.profile];
       return {
@@ -237,4 +237,29 @@ export function capexProjects(scope,month,reference = `actual`) {
     const budget=plan*b, actual=spent*s, committed=budget*o;
     return {name,budget,actual,committed,remaining:budget-actual-committed};
   });
+}
+
+export const reportWindows = {
+  Q1:{label:`Q1 2026`,months:[0,1,2]},
+  Q2:{label:`Q2 2026`,months:[3,4,5]},
+  Q3:{label:`Q3 2026`,months:[6,7,8]},
+  Q4:{label:`Q4 2026 Forecast`,months:[9,10,11]},
+  YTD:{label:`YTD through Oct 2026`,months:range(closedMonth,true)},
+};
+
+function periodReference(reference, month){
+  return reference===`actual`&&month>closedMonth?`forecast`:reference;
+}
+
+export function periodFinancials(scope, periods, reference = `actual`){
+  const rows=periods.flatMap(month=>tradeRows(scope,[month],periodReference(reference,month)));
+  const figures=statement(rows);
+  const internal=scope.company&&!scope.market&&!scope.product
+    ? periods.reduce((sum,month)=>sum+intercompany(scope,[month],periodReference(reference,month)),0):0;
+  const revenue=figures.revenue+internal;
+  return {rows,internal,figures:{...figures,revenue,cogs:figures.cogs+internal,margin:revenue?figures.gross/revenue:0}};
+}
+
+export function cashForPeriods(schedule, periods){
+  return {operating:periods.reduce((sum,month)=>sum+schedule[month].operating,0),closing:schedule[periods.at(-1)].closing};
 }

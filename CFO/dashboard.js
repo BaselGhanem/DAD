@@ -1,8 +1,8 @@
 import {
   closedMonth, months, entities, markets, products, references, range, scopeEntities, tradeRows,
-  statement, bridge, financials, intercompany, fyRows, workingCapital, cashSchedule, capexProjects,
-} from "./model.js?v=markets";
-import {executivePdf} from "./executive-pdf.js?v=2";
+  statement, bridge, financials, intercompany, fyRows, workingCapital, cashSchedule, capexProjects, reportWindows, periodFinancials, cashForPeriods,
+} from "./model.js?v=aligned";
+import {executivePdf} from "./executive-pdf.js?v=3";
 
 const views = {
   overview:[`Executive Overview`,`dashboard`,`Profitability, liquidity and priorities at a glance.`],
@@ -16,9 +16,10 @@ const views = {
 };
 
 const $ = id=>document.getElementById(id);
-const state={page:`overview`,month:closedMonth,compare:`budget`,company:``,market:``,local:false,metric:``};
+const state={page:`overview`,month:closedMonth,window:``,product:``,compare:`budget`,company:``,market:``,local:false,metric:``};
 let blocks=[];
-const periodLabel=()=>`${months[state.month]} 2026`;
+const periodLabel=()=>reportWindows[state.window]?.label||`${months[state.month]} 2026`;
+const currentLabel=()=>state.window===`Q4`?`Oct actual + Nov–Dec forecast`:`Actual`;
 const entity=()=>entities.find(e=>e.id===state.company);
 const availableMarkets=company=>company?markets.filter(name=>company.markets.some(([market])=>market===name)):markets;
 const currency=()=>state.local&&entity()?entity().currency:`USD`;
@@ -47,7 +48,7 @@ const fmtCell=(col,value)=>col.format(value);
 const itemLink=(label, filter)=>({label,filter});
 const hashFor=(page,overrides={})=>{
   const s={...state,...overrides};
-  return `#${page}?${new URLSearchParams({period:s.month+1,compare:s.compare,company:s.company,market:s.market,currency:s.local?`local`:`usd`,metric:s.metric})}`;
+  return `#${page}?${new URLSearchParams({period:s.window||s.month+1,compare:s.compare,company:s.company,market:s.market,currency:s.local?`local`:`usd`,metric:s.metric,product:page===`profit`?s.product:``})}`;
 };
 
 function table(title, columns, rows, productSearch=false){
@@ -100,16 +101,15 @@ const metricInfo=[
 ];
 function sectionData(){
   const month=state.month;
-  const rows=tradeRows(state,[month]);
-  const base=tradeRows(state,[month],state.compare);
-  const actual=financials(state,[month]);
-  const target=financials(state,[month],state.compare);
-  const ytd=financials(state,range(month,true));
+  const periods=reportWindows[state.window]?.months||[month];
+  const {rows,figures:actual,internal}=periodFinancials(state,periods);
+  const {rows:base,figures:target}=periodFinancials(state,periods,state.compare);
+  const {figures:ytd}=periodFinancials(state,range(month,true));
   const schedule=cashSchedule(state);
   const baseCash=cashSchedule(state,state.compare);
-  const wc=workingCapital(state,month);
+  const wc=workingCapital(state,month,state.window===`Q4`?`forecast`:`actual`);
   const baseWC=workingCapital(state,month,state.compare);
-  return {rows,base,actual,target,ytd,schedule,baseCash,wc,baseWC,contributions:bridge(rows,base)};
+  return {rows,base,actual,target,ytd,schedule,baseCash,wc,baseWC,periods,internal,contributions:bridge(rows,base)};
 }
 
 function alerts(data){
@@ -128,8 +128,8 @@ function alerts(data){
 }
 
 function overview(d){
-  const current={...d.actual,...d.schedule[state.month],...d.wc};
-  const reference={...d.target,...d.baseCash[state.month],...d.baseWC};
+  const current={...d.actual,...cashForPeriods(d.schedule,d.periods),...d.wc};
+  const reference={...d.target,...cashForPeriods(d.baseCash,d.periods),...d.baseWC};
   const ytd={...d.ytd,operating:d.schedule.slice(0,state.month+1).reduce((sum,row)=>sum+row.operating,0)};
   const cards=metricInfo.map(m=>{
     const visible=!state.market||!m.entityOnly;
@@ -138,9 +138,9 @@ function overview(d){
     return `<a class="metric" href="${esc(hashFor(m.page,{metric:m.key}))}"><span class="metric-icon material-symbols-outlined" aria-hidden="true">${m.icon}</span><span class="metric-label">${esc(m.label)}</span><strong class="metric-value">${visible?m.format(current[m.key]):`—`}</strong><small class="${marker}">${visible?`${sign(delta,m.delta||m.format)} vs ${references[state.compare]}`:`Company-level measure`}</small><small>${visible?m.stock?`Month-end balance`:`YTD ${m.format(ytd[m.key])}`:`Clear market to view`}</small></a>`;
   }).join(``);
   const summaries=alerts(d);
-  blocks.push({title:`Executive KPIs`,columns:[plain(`KPI`),plain(`Actual`),plain(`Reference`),plain(`YTD`)],rows:metricInfo.filter(m=>!state.market||!m.entityOnly).map(m=>[m.label,m.format(current[m.key]),m.format(reference[m.key]),m.stock?`Month-end`:m.format(ytd[m.key])])});
+  blocks.push({title:`Executive KPIs`,columns:[plain(`KPI`),plain(currentLabel()),plain(`Reference`),plain(`YTD`)],rows:metricInfo.filter(m=>!state.market||!m.entityOnly).map(m=>[m.label,m.format(current[m.key]),m.format(reference[m.key]),m.stock?`Month-end`:m.format(ytd[m.key])])});
   blocks.push({title:`Priority watchlist`,columns:[plain(`Issue`),money(`Impact`),plain(`Due`),plain(`Reason`)],rows:summaries.map(a=>[a.label,a.impact,displayDate.format(a.due),a.reason])});
-  return `<div class="cards">${cards}</div><div class="rail">${panel(`Profitability vs ${references[state.compare]}`,bars(`EBITDA comparison`,[[`Actual EBITDA`,d.actual.ebitda],[references[state.compare],d.target.ebitda]])+`<a class="inline" href="${esc(hashFor(`profit`,{metric:`ebitda`}))}">Explore EBITDA drivers →</a>`,`Variance ${sign(d.actual.ebitda-d.target.ebitda,cash)} ${currency()}`)}
+  return `<div class="cards">${cards}</div><div class="rail">${panel(`Profitability vs ${references[state.compare]}`,bars(`EBITDA comparison`,[[state.window===`Q4`?`Q4 EBITDA outlook`:`Actual EBITDA`,d.actual.ebitda],[references[state.compare],d.target.ebitda]])+`<a class="inline" href="${esc(hashFor(`profit`,{metric:`ebitda`}))}">Explore EBITDA drivers →</a>`,`Variance ${sign(d.actual.ebitda-d.target.ebitda,cash)} ${currency()}`)}
   ${state.market?noMarket(`Cash through year-end`):panel(`Cash through year-end`,bars(`Closing cash`,d.schedule.slice(state.month).map(r=>[`${r.label} ${r.forecast?`Fcst`:`Act`}`,r.closing]))+`<a class="inline" href="${esc(hashFor(`cash`,{metric:`closing`}))}">View cash schedule →</a>`,`Closing cash · ${currency()}`)}
   ${panel(`Needs attention`,summaries.slice(0,3).map(a=>`<a class="flag" href="${esc(hashFor(a.page,{metric:a.metric}))}"><strong><span class="material-symbols-outlined" aria-hidden="true">warning</span>${esc(a.label)}</strong><span>${cash(a.impact)} ${currency()} · ${displayDate.format(a.due)}</span><span>${esc(a.reason)}</span></a>`).join(``),`Ranked by financial impact and days to due date`,false,true)}</div>`;
 }
@@ -150,27 +150,29 @@ function profit(d){
   const rows=lines.map(([label,key])=>[label,key===`margin`?percent(d.actual[key]):cash(d.actual[key]),key===`margin`?percent(d.target[key]):cash(d.target[key]),sign(d.actual[key]-d.target[key],key===`margin`?points:cash)]);
   const groupBy=state.market?`product`:state.company?`market`:`company`;
   const breakdown=aggregate(d.rows,groupBy,r=>r.quantity*r.price).map(([label,value])=>[groupBy===`company`?itemLink(label,{company:entities.find(e=>e.name===label).id,market:``}):groupBy===`market`?itemLink(label,{market:label}):label,value]);
-  const productRows=products.map(product=>{
+  const productRows=products.filter(product=>!state.product||product.name===state.product).map(product=>{
     const actual=statement(d.rows.filter(r=>r.product===product.name));
     const ref=statement(d.base.filter(r=>r.product===product.name));
     return [product.name,actual.revenue,actual.margin,actual.material,actual.conversion,actual.ebitda-ref.ebitda];
   });
-  const internal=state.company&&!state.market?intercompany(state,[state.month]):0;
+  const internal=d.internal;
   if(internal)breakdown.push([`Intragroup sales at cost`,internal]);
-  return `<div class="details">${panel(`Income statement`,table(`Income statement`,[`Line item`,`Actual`,references[state.compare],`Difference`].map(plain),rows),`P&L · ${currency()}`)}
-  ${panel(`EBITDA variance bridge`,waterfall(d.target.ebitda,d.contributions,d.actual.ebitda,`EBITDA variance bridge`),`${references[state.compare]} to actual · ${currency()}`)}
+  return `${state.product?`<p class="product-scope">Product <strong>${esc(state.product)}</strong> · <a href="${esc(hashFor(`profit`,{product:``}))}">Show all products</a></p>`:``}<div class="details">${panel(`Income statement`,table(`Income statement`,[`Line item`,currentLabel(),references[state.compare],`Difference`].map(plain),rows),`P&L · ${currency()}`)}
+  ${panel(`EBITDA variance bridge`,waterfall(d.target.ebitda,d.contributions,d.actual.ebitda,`EBITDA variance bridge`,[`Reference EBITDA`,state.window===`Q4`?`Q4 EBITDA outlook`:`Actual EBITDA`]),`${references[state.compare]} to ${state.window===`Q4`?`outlook`:`actual`} · ${currency()}`)}
   ${panel(`Revenue by ${groupBy}`,table(`Revenue by ${groupBy}`,[plain(`Scope`),money(`Net revenue`)],breakdown,groupBy===`product`),groupBy===`product`?`External net revenue by product · ${currency()}`:`Select a company or market to drill down`)}
   ${panel(`Product profitability`,table(`Product profitability`,[plain(`Product`),money(`External net revenue`),percentage(`GM`),money(`Materials`),money(`Manufacturing`),money(`EBITDA variance`)],productRows,true),`External sales and production costs · ${currency()}`,true)}</div>`;
 }
 function treasury(d){
   if(state.market)return noMarket(`Cash & Treasury`);
-  const dates=d.schedule.slice(state.month);
+  const dates=d.schedule.slice(d.periods[0]);
+  const periodCash=cashForPeriods(d.schedule,d.periods);
   const cashRows=dates.map(r=>[`${r.label} ${r.forecast?`Forecast`:`Actual`}`,r.opening,r.receipts,r.suppliers,r.payroll,r.taxes,r.other,r.operating,r.capex,r.debt,r.closing]);
   const lines=[[`Customer collections`,`receipts`],[`Supplier payments`,`suppliers`],[`Payroll`,`payroll`],[`Tax payments`,`taxes`],[`Other operating payments`,`other`],[`Investing / CapEx`,`capex`],[`Debt service`,`debt`]];
-  return `<div class="details">${panel(`Month-end cash`,bars(`Monthly closing cash`,dates.map(r=>[`${r.label} ${r.forecast?`Forecast`:`Actual`}`,r.closing])),`Closed actuals, then forecast after ${months[closedMonth]}`)}
-  ${panel(`Actual and ${references[state.compare]}`,table(`Closing cash comparison`,[plain(`Month`),money(`Closing cash`),money(references[state.compare])],dates.map(r=>[r.label,r.closing,d.baseCash[r.month].closing])),`Balances · ${currency()}`)}
+  return `<div class="details">${panel(`Selected-period cash summary`,table(`Cash summary`,[plain(`Measure`),money(`Period value`)],[[`Operating Cash Flow`,periodCash.operating],[`Available Cash at Period End`,periodCash.closing]]),`${periodLabel()} · ${currency()}`,true)}
+  ${panel(`Month-end cash`,bars(`Monthly closing cash`,dates.map(r=>[`${r.label} ${r.forecast?`Forecast`:`Actual`}`,r.closing])),`Closed actuals, then forecast after ${months[closedMonth]}`)}
+  ${panel(`Closing cash vs ${references[state.compare]}`,table(`Closing cash comparison`,[plain(`Month`),money(`Closing cash`),money(references[state.compare])],dates.map(r=>[r.label,r.closing,d.baseCash[r.month].closing])),`Balances · ${currency()}`)}
   ${panel(`Monthly cash flow schedule`,table(`Cash flow schedule`,[plain(`Month`),...`Opening|Collections|Suppliers|Payroll|Taxes|Other operating|Operating cash flow|CapEx|Debt service|Closing`.split(`|`).map(money)],cashRows),`Payments shown as outflows · ${currency()}`,true)}
-  ${panel(`Current-month sources and uses`,table(`Cash sources and uses`,[plain(`Cash line`),money(`Actual`),money(references[state.compare])],lines.map(([label,key])=>[label,d.schedule[state.month][key],d.baseCash[state.month][key]])),`Detail by cash-flow category · ${currency()}`)}</div>`;
+  ${panel(`Selected-period sources and uses`,table(`Cash sources and uses`,[plain(`Cash line`),money(currentLabel()),money(references[state.compare])],lines.map(([label,key])=>[label,d.periods.reduce((sum,m)=>sum+d.schedule[m][key],0),d.periods.reduce((sum,m)=>sum+d.baseCash[m][key],0)])),`Detail by cash-flow category · ${currency()}`)}</div>`;
 }
 
 function inventoryRows(d){
@@ -188,7 +190,7 @@ function working(d){
   ];
   const overdue=d.wc.ar*.22;
   return `<div class="details">
-  ${state.market?noMarket(`Cash conversion cycle`):panel(`Cash conversion cycle`,table(`Cash conversion cycle`,[plain(`Metric`),dayColumn(`Actual`),dayColumn(references[state.compare])],[`dso`,`dio`,`dpo`,`ccc`].map(k=>[k.toUpperCase(),d.wc[k],d.baseWC[k]])),`Month-end balances divided by current-month activity × 30`)}
+  ${state.market?noMarket(`Cash conversion cycle`):panel(`Cash conversion cycle`,table(`Cash conversion cycle`,[plain(`Metric`),dayColumn(currentLabel()),dayColumn(references[state.compare])],[`dso`,`dio`,`dpo`,`ccc`].map(k=>[k.toUpperCase(),d.wc[k],d.baseWC[k]])),`Month-end balances divided by current-month activity × 30`)}
   ${panel(`Accounts receivable aging`,bars(`Receivable aging`,debt),`Aged by days past due · ${currency()}`)}
   ${panel(`Largest overdue customers`,table(`Overdue customers`,[plain(`Account`),money(`Past due >60 days`)],merchants.map((name,i)=>[name,overdue*[.34,.27,.22,.17][i]])),`Reconciles to the 61+ day buckets`)}
   ${panel(`Supplier obligations`,table(`Supplier obligations`,[plain(`Payment window`),money(`Payables`)],[[`Next 7 days`,d.wc.ap*.22],[`8–30 days`,d.wc.ap*.39],[`31–60 days`,d.wc.ap*.27],[`Later`,d.wc.ap*.12]]),`Open amounts by due window · ${currency()}`)}
@@ -208,29 +210,31 @@ function manufacturing(d){
     const b=statement(d.base.filter(r=>r.product===product.name));
     return [product.name,a.material,b.material,a.material-b.material,a.conversion,b.conversion,a.conversion-b.conversion];
   });
-  return `<div class="details">${panel(`Material and manufacturing costs`,table(`Production costs`,[plain(`Product`),...`Materials actual|Materials reference|Materials difference|Manufacturing actual|Manufacturing reference|Manufacturing difference`.split(`|`).map(money)],categories,true),`Compared with ${references[state.compare]} · ${currency()}`,true)}
+  return `<div class="details">${panel(`Material and manufacturing costs`,table(`Production costs`,[plain(`Product`),...`Materials period value|Materials reference|Materials difference|Manufacturing period value|Manufacturing reference|Manufacturing difference`.split(`|`).map(money)],categories,true),`Compared with ${references[state.compare]} · ${currency()}`,true)}
   ${panel(`Inventory exposure`,table(`Inventory exposure`,[plain(`Product`),money(`Stock value`),money(`Slow-moving`),money(`Expires in 90 days`)],inventoryRows(d),true),`Risk categories can overlap · ${currency()}`,true)}</div>`;
 }
 function capex(){
   if(state.market)return noMarket(`CapEx & Commitments`);
-  const p=capexProjects(state,state.month);
+  const p=capexProjects(state,Math.min(state.month,closedMonth));
   return `<div class="details">${panel(`Capital projects`,table(`Capital projects`,[plain(`Project`),money(`Annual budget`),money(`YTD spend`),money(`Open commitments`),money(`Headroom`)],p.map(row=>[row.name,row.budget,row.actual,row.committed,row.remaining])),`Headroom = budget − spend − open commitments · ${currency()}`,true)}
   ${panel(`Budget headroom by project`,bars(`CapEx headroom`,p.map(r=>[r.name,r.remaining])),`Negative headroom flags a potential overrun`)}</div>`;
 }
-function close(d){
+function close(){
   if(state.market)return noMarket(`Financial Close`);
   const population=scopeEntities(state);
-  const period=[state.month];
-  const input=population.map(e=>[itemLink(e.name,{company:e.id}),`Closed`,displayDate.format(dateAt(state.month+1,5+entities.indexOf(e)*2)),financials({company:e.id},period).revenue,intercompany({company:e.id},period)]);
+  const closeMonth=Math.min(state.month,closedMonth);
+  const period=[closeMonth];
+  const input=population.map(e=>[itemLink(e.name,{company:e.id}),`Closed`,displayDate.format(dateAt(closeMonth+1,5+entities.indexOf(e)*2)),financials({company:e.id},period).revenue,intercompany({company:e.id},period)]);
   const combined=population.reduce((acc,e)=>{
     const f=financials({company:e.id},period);
     return {revenue:acc.revenue+f.revenue,cogs:acc.cogs+f.cogs,ebitda:acc.ebitda+f.ebitda};
   },{revenue:0,cogs:0,ebitda:0});
   const elimination=intercompany(state,period);
+  const closed=financials(state,period);
   const consolidated=state.company
     ? [[`Entity as reported`,combined.revenue,combined.cogs,combined.ebitda],[`Included intragroup transfers at cost`,elimination,elimination,0],[`Entity external sales view`,combined.revenue-elimination,combined.cogs-elimination,combined.ebitda]]
-    : [[`Combined entity submissions`,combined.revenue,combined.cogs,combined.ebitda],[`Intercompany eliminations`,-elimination,-elimination,0],[`Consolidated group`,d.actual.revenue,d.actual.cogs,d.actual.ebitda]];
-  return `<div class="details">${panel(`Entity close status`,table(`Entity submissions`,[plain(`Company`),plain(`Status`),plain(`Closed on`),money(`Reported revenue`),money(`Intercompany`)],input),`${periodLabel()} · ${currency()}`,true)}
+    : [[`Combined entity submissions`,combined.revenue,combined.cogs,combined.ebitda],[`Intercompany eliminations`,-elimination,-elimination,0],[`Consolidated group`,closed.revenue,closed.cogs,closed.ebitda]];
+  return `<div class="details">${panel(`Entity close status`,table(`Entity submissions`,[plain(`Company`),plain(`Status`),plain(`Closed on`),money(`Reported revenue`),money(`Intercompany`)],input),`${months[closeMonth]} 2026 close · ${currency()}`,true)}
   ${panel(`Consolidation reconciliation`,table(`Consolidation reconciliation`,[plain(`Step`),money(`Net revenue`),money(`COGS`),money(`EBITDA`)],consolidated),state.company?`Intragroup amounts are included in the entity submission`:`Transfers at cost are removed from both revenue and COGS`,true)}</div>`;
 }
 const renderers={overview,profit,cash:treasury,working,forecast,manufacturing,capex,close};
@@ -238,11 +242,15 @@ const option=(value,label,selected=false)=>`<option value="${esc(value)}"${selec
 function parse(){
   const [page,query]=location.hash.slice(1).split(`?`);
   const q=new URLSearchParams(query);
-  const n=Number(q.get(`period`))-1;
+  const period=q.get(`period`);
+  const n=Number(period)-1;
+  const window=Object.hasOwn(reportWindows,period)?period:``;
   const company=entities.find(e=>e.id===q.get(`company`));
   Object.assign(state,{
     page:Object.hasOwn(views,page)?page:`overview`,
-    month:Number.isInteger(n)&&n>=0&&n<=closedMonth?n:closedMonth,
+    window,
+    month:window?reportWindows[window].months.at(-1):Number.isInteger(n)&&n>=0&&n<=closedMonth?n:closedMonth,
+    product:page===`profit`&&products.some(p=>p.name===q.get(`product`))?q.get(`product`):``,
     compare:[`budget`,`prior`,`forecast`].includes(q.get(`compare`))?q.get(`compare`):`budget`,
     company:company?.id||``,
     market:availableMarkets(company).includes(q.get(`market`))?q.get(`market`):``,
@@ -256,11 +264,11 @@ function update(){
   const d=sectionData();
   const [title,,subtitle]=views[state.page];
   const label=metricInfo.find(m=>m.key===state.metric)?.label||(state.metric===`inventory`?`Inventory exposure`:``);
-  $(`scope-label`).textContent=[entity()?.name||`Dar Al Dawa Group`,state.market].filter(Boolean).join(` / `);
+  $(`scope-label`).textContent=[entity()?.name||`Dar Al Dawa Group`,state.market,state.product].filter(Boolean).join(` / `);
   $(`page-title`).textContent=state.page===`overview`?`CFO Dashboard`:title;
   $(`section-title`).textContent=title;
   $(`subtitle`).textContent=`${label?`${label} · `:``}${subtitle}`;
-  $(`period`).innerHTML=months.slice(0,closedMonth+1).map((m,i)=>option(i+1,`${m} 2026${i===closedMonth?` · latest close`:``}`,state.month===i)).join(``);
+  $(`period`).innerHTML=months.slice(0,closedMonth+1).map((m,i)=>option(i+1,`${m} 2026${i===closedMonth?` · latest close`:``}`,!state.window&&state.month===i)).join(``)+Object.entries(reportWindows).map(([key,period])=>option(key,period.label,state.window===key)).join(``);
   $(`compare`).value=state.compare;
   $(`company`).innerHTML=option(``,`Consolidated group`,!entity())+entities.map(e=>option(e.id,`${e.code} · ${e.name}`,e.id===state.company)).join(``);
   $(`market`).innerHTML=option(``,`All markets`,!state.market)+availableMarkets(entity()).map(m=>option(m,m,m===state.market)).join(``);
@@ -274,7 +282,7 @@ function update(){
 function setFilter(e){
   const value=e.target.value;
   const change={
-    period:{month:Number(value)-1},compare:{compare:value},
+    period:Object.hasOwn(reportWindows,value)?{window:value}:{window:``,month:Number(value)-1},compare:{compare:value},
     company:{company:value,local:false},
     market:{market:value},currency:{local:value===`local`},
   }[e.target.id];
@@ -301,7 +309,7 @@ function exportCsv(){
   downloadFile(new Blob([`\uFEFF`,output],{type:`text/csv;charset=utf-8`}),`DAD-CFO-${state.page}-${downloadPeriod()}.csv`);
   $(`status`).textContent=`Analysis exported as CSV.`;
 }
-const downloadPeriod=()=>`2026-${String(state.month+1).padStart(2,`0`)}`;
+const downloadPeriod=()=>`2026-${state.window||String(state.month+1).padStart(2,`0`)}`;
 function downloadFile(blob,filename){
   const url=URL.createObjectURL(blob);
   const link=document.createElement(`a`);
