@@ -3,61 +3,56 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#f3f7fa">
+  <meta name="theme-color" content="#f5f8fa">
   <title>Executive Dashboards | Dar Al Dawa</title>
   <link rel="stylesheet" href="assets/executive.css">
 </head>
 <body>
-  <div class="frame">
-    <header class="masthead">
-      <span class="brand">Dar Al Dawa</span>
-    </header>
-    <main>
-      <div class="intro">
-        <h1>Executive<br><span>Dashboards</span></h1>
-        <p>Choose a workspace to view its reports.</p>
-      </div>
-      <div class="workspaces" aria-label="Executive workspaces">
-        <a class="workspace workspace--ceo" href="./CEO/">
-          <div class="art" aria-hidden="true">
-            <span class="grid-plane"></span>
-            <span class="orbit orbit--outer"></span><span class="orbit orbit--inner"></span>
-            <span class="radar-core"><span></span></span>
-            <span class="satellite satellite--one"></span><span class="satellite satellite--two"></span>
-          </div>
-          <div class="role">
-            <h2>CEO</h2>
-            <p>Chief Executive Officer</p>
-          </div>
-          <p class="scope">Company performance, strategic milestones and executive risks.</p>
-          <div class="card-footer"><span>Open dashboard</span><span class="arrow" aria-hidden="true">↗</span></div>
-        </a>
-        <a class="workspace workspace--cfo" href="./CFO/">
-          <div class="art" aria-hidden="true">
-            <span class="grid-plane"></span>
-            <span class="bar-graph"><i></i><i></i><i></i><i></i><i></i></span>
-          </div>
-          <div class="role">
-            <h2>CFO</h2>
-            <p>Chief Financial Officer</p>
-          </div>
-          <p class="scope">Financial performance, cash flow and budget oversight.</p>
-          <div class="card-footer"><span>Open dashboard</span><span class="arrow" aria-hidden="true">↗</span></div>
-        </a>
-        <a class="workspace workspace--cco" href="./CCO/">
-          <div class="art" aria-hidden="true">
-            <span class="grid-plane"></span>
-            <span class="signal"><i></i><i></i><i></i><i></i><i></i></span>
-          </div>
-          <div class="role">
-            <h2>CCO</h2>
-            <p>Chief Commercial Officer</p>
-          </div>
-          <p class="scope">Sales performance, market trends and commercial opportunities.</p>
-          <div class="card-footer"><span>Open dashboard</span><span class="arrow" aria-hidden="true">↗</span></div>
-        </a>
-      </div>
-    </main>
-  </div>
+  <header class="masthead">
+    <span class="brand">Dar Al Dawa</span>
+  </header>
+  <main class="portal">
+    <section class="content" aria-labelledby="portal-title">
+      <h1 id="portal-title">Executive <span>Dashboards</span></h1>
+      <p class="intro">Choose a workspace to view its reports.</p>
+      <nav aria-label="Executive workspaces">
+        <ul class="workspaces">
+          <li>
+            <a class="workspace workspace--ceo" href="./CEO/" aria-labelledby="ceo-title" aria-describedby="ceo-scope">
+              <span class="workspace-icon icon-compass" aria-hidden="true"></span>
+              <span class="workspace-copy">
+                <span class="workspace-title" id="ceo-title"><strong>CEO</strong> <span>Chief Executive Officer</span></span>
+                <span class="scope" id="ceo-scope">Company performance and strategy</span>
+              </span>
+              <span class="workspace-arrow" aria-hidden="true"></span>
+            </a>
+          </li>
+          <li>
+            <a class="workspace workspace--cfo" href="./CFO/" aria-labelledby="cfo-title" aria-describedby="cfo-scope">
+              <span class="workspace-icon icon-chart" aria-hidden="true"></span>
+              <span class="workspace-copy">
+                <span class="workspace-title" id="cfo-title"><strong>CFO</strong> <span>Chief Financial Officer</span></span>
+                <span class="scope" id="cfo-scope">Financial performance and planning</span>
+              </span>
+              <span class="workspace-arrow" aria-hidden="true"></span>
+            </a>
+          </li>
+          <li>
+            <a class="workspace workspace--cco" href="./CCO/" aria-labelledby="cco-title" aria-describedby="cco-scope">
+              <span class="workspace-icon icon-growth" aria-hidden="true"></span>
+              <span class="workspace-copy">
+                <span class="workspace-title" id="cco-title"><strong>CCO</strong> <span>Chief Commercial Officer</span></span>
+                <span class="scope" id="cco-scope">Sales performance and market growth</span>
+              </span>
+              <span class="workspace-arrow" aria-hidden="true"></span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </section>
+    <div class="facility">
+      <img src="assets/dad-facility.webp" alt="" fetchpriority="high">
+    </div>
+  </main>
 </body>
 </html>
