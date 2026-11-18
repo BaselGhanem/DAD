@@ -5,11 +5,111 @@ export const entities = [
   {id:`maghreb`, name:`Demo Maghreb Distribution`, currency:`DZD`, rate:134, size:.61, markets:[[`Algeria`,.87],[`Tunisia`,.13]]},
   {id:`europe`, name:`Demo Europe Commercial`, currency:`RON`, rate:4.53, size:.39, markets:[[`Romania`,1]]},
 ];
-export const products = [
-  {name:`Cardiovascular`, share:.39, unitPrice:14.2, material:5.25, conversion:2.35},
-  {name:`Anti-infectives`, share:.34, unitPrice:11.8, material:4.55, conversion:2.10},
-  {name:`Gastrointestinal`, share:.27, unitPrice:9.6, material:3.35, conversion:1.80},
+const productNames = [
+  `Amuretic`,
+  `Angiosar`,
+  `Angiosar - Plus`,
+  `Aresil`,
+  `Azord - Xevaneer`,
+  `Capocard`,
+  `Ciprodar - Qurex`,
+  `Clavodar`,
+  `Daroxime`,
+  `Deplazen`,
+  `Diclogesic`,
+  `Dilzacard`,
+  `Famodar`,
+  `Flucoheal`,
+  `Gamcet`,
+  `Gamcet Duo`,
+  `Glenpa`,
+  `Glunorm`,
+  `Glunorm M`,
+  `Hairgrow`,
+  `Histafen Topical`,
+  `Ibugesic`,
+  `Locan`,
+  `Lovista - Evadad`,
+  `Matador - Livador`,
+  `Mixif - Murex`,
+  `Motrinex`,
+  `Mycoheal`,
+  `Myogesic`,
+  `Neobacin`,
+  `Nulina`,
+  `Omedar`,
+  `Oprim`,
+  `Pantodar`,
+  `Pedexa`,
+  `Proctoheal`,
+  `Rina`,
+  `Rozitta - Robust`,
+  `Smooderm`,
+  `Tyra 20 Mg`,
+  `Tyra 5 Mg`,
+  `Vitadad - DivaD`,
+  `Xenpa`,
+  `Zarlan - Xivar`,
+  `Clomifert - Avaklamin`,
+  `Dad Teething Gel`,
+  `Diclofast-Solvast`,
+  `Erythrodar`,
+  `Liblab - Avilop`,
+  `Ophtamolol`,
+  `Pamol`,
+  `Trimidar-M`,
+  `Amlodar - Amolar`,
+  `Xenpa-met`,
+  `Amoxydar - Moxidad`,
+  `Carbatol`,
+  `Domperide`,
+  `Doxydar`,
+  `Fastikol`,
+  `Formit - Gliafor`,
+  `Loratan - Loradad`,
+  `Volar`,
+  `Violet`,
+  `Atrenova`,
+  `Cephadar`,
+  `Dasatinib`,
+  `Lincodar`,
+  `Procula`,
+  `Ambolar`,
+  `Claridar`,
+  `Cloracef`,
+  `Combizart`,
+  `Combizart HCT`,
+  `Gizlan`,
+  `Gizlan Duo - Gizamlo`,
+  `Lipodar`,
+  `Mozart`,
+  `Mozart - HCT`,
+  `Ophtamesone`,
+  `Anxetin`,
+  `Cibramine`,
+  `Epigab`,
+  `Esperal-Espedar-Tiaqueen`,
+  `Mirale`,
+  `Olzan`,
 ];
+
+const demoProfiles = [
+  {share:.39, unitPrice:14.2, material:5.25, conversion:2.35},
+  {share:.34, unitPrice:11.8, material:4.55, conversion:2.10},
+  {share:.27, unitPrice:9.6, material:3.35, conversion:1.80},
+];
+
+// Split the existing illustrative financial profiles across display names.
+const entries = productNames.map((name,index)=>({
+  name, profile:index%demoProfiles.length, weight:1+(index*13)%19,
+}));
+const weightsByProfile = demoProfiles.map((_,index)=>
+  entries.reduce((sum,entry)=>sum+(entry.profile===index?entry.weight:0),0)
+);
+export const products = entries.map(({name,profile,weight})=>{
+  const {share,unitPrice,material,conversion}=demoProfiles[profile];
+  return {name,profile,share:share*weight/weightsByProfile[profile],unitPrice,material,conversion};
+});
 export const references = {budget:`Budget`,prior:`Prior year`,forecast:`Forecast`,actual:`Actual`,previous:`Previous forecast`};
 const assumptions = {
   actual: {volume:.976, price:1.012, material:1.039, conversion:1.018, opex:1.018, mix:[.98,1.03,.997]},
@@ -29,9 +129,9 @@ export function tradeRows(scope, periods, reference = `actual`) {
   const rules = assumptions[reference];
   return scopeEntities(scope).flatMap((entity)=>periods.flatMap(month=>entity.markets.flatMap(([market, share],mi)=>{
     if (scope.market && market !== scope.market) return [];
-    return products.map((product,pi)=>{
+    return products.map(product=>{
       const seasonal = 1 + month*.019 + [0,.025,-.018,.012][month%4];
-      const quantity = 290000 * entity.size * share * product.share * seasonal * rules.volume * rules.mix[pi];
+      const quantity = 290000 * entity.size * share * product.share * seasonal * rules.volume * rules.mix[product.profile];
       return {
         company:entity.name, market, product:product.name, month,
         quantity, price:product.unitPrice*rules.price*(1+mi*.013),

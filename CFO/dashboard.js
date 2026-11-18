@@ -1,7 +1,7 @@
 import {
   closedMonth, months, entities, products, references, range, scopeEntities, tradeRows,
   statement, bridge, financials, intercompany, fyRows, workingCapital, cashSchedule, capexProjects,
-} from "./model.js";
+} from "./model.js?v=products";
 
 const views = {
   overview:[`Executive Overview`,`dashboard`,`Profitability, liquidity and priorities at a glance.`],
@@ -48,9 +48,10 @@ const hashFor=(page,overrides={})=>{
   return `#${page}?${new URLSearchParams({period:s.month+1,compare:s.compare,company:s.company,market:s.market,currency:s.local?`local`:`usd`,metric:s.metric})}`;
 };
 
-function table(title, columns, rows){
+function table(title, columns, rows, productSearch=false){
   blocks.push({title,columns,rows});
-  return `<div class="table-wrap"><table aria-label="${esc(title)}"><thead><tr>${columns.map(col=>`<th scope="col" ${col.format===String?``:`data-number`}>${esc(col.label)}</th>`).join(``)}</tr></thead><tbody>${rows.map(row=>`<tr>${row.map((value,index)=>{
+  const search=productSearch?`<div class="product-tools"><label>Search products <input type="search" placeholder="Enter a product name" data-product-search></label><span class="caption" role="status" data-product-count>${rows.length} products</span></div>`:``;
+  return `${search}<div class="table-wrap${productSearch?` product-table`:``}"${productSearch?` tabindex="0" role="region" aria-label="${esc(title)} rows"`:``}><table aria-label="${esc(title)}"><thead><tr>${columns.map(col=>`<th scope="col" ${col.format===String?``:`data-number`}>${esc(col.label)}</th>`).join(``)}</tr></thead><tbody>${rows.map(row=>`<tr>${row.map((value,index)=>{
     const col=columns[index];
     const display=typeof value===`object`?`<a href="${esc(hashFor(state.page,value.filter))}">${esc(value.label)}</a>`:esc(fmtCell(col,value));
     return `<td ${col.format===String?``:`data-number`}>${display}</td>`;
@@ -156,8 +157,8 @@ function profit(d){
   if(internal)breakdown.push([`Intragroup sales at cost`,internal]);
   return `<div class="details">${panel(`Income statement`,table(`Income statement`,[`Line item`,`Actual`,references[state.compare],`Difference`].map(plain),rows),`P&L · ${currency()}`)}
   ${panel(`EBITDA variance bridge`,waterfall(d.target.ebitda,d.contributions,d.actual.ebitda,`EBITDA variance bridge`),`${references[state.compare]} to actual · ${currency()}`)}
-  ${panel(`Revenue by ${groupBy}`,table(`Revenue by ${groupBy}`,[plain(`Scope`),money(`Net revenue`)],breakdown),`Select a company or market to drill down`)}
-  ${panel(`Product profitability`,table(`Product profitability`,[plain(`Product`),money(`External net revenue`),percentage(`GM`),money(`Materials`),money(`Manufacturing`),money(`EBITDA variance`)],productRows),`External sales and production costs · ${currency()}`,true)}</div>`;
+  ${panel(`Revenue by ${groupBy}`,table(`Revenue by ${groupBy}`,[plain(`Scope`),money(`Net revenue`)],breakdown,groupBy===`product`),groupBy===`product`?`External net revenue by product · ${currency()}`:`Select a company or market to drill down`)}
+  ${panel(`Product profitability`,table(`Product profitability`,[plain(`Product`),money(`External net revenue`),percentage(`GM`),money(`Materials`),money(`Manufacturing`),money(`EBITDA variance`)],productRows,true),`External sales and production costs · ${currency()}`,true)}</div>`;
 }
 function treasury(d){
   if(state.market)return noMarket(`Cash & Treasury`);
@@ -173,9 +174,9 @@ function treasury(d){
 function inventoryRows(d){
   const categories=aggregate(d.rows,`product`,r=>r.quantity*(r.material+r.conversion));
   const externalCogs=statement(d.rows).cogs;
-  return categories.map(([product,cost])=>{
+  return categories.map(([product,cost],index)=>{
     const value=d.wc.inventory*cost/externalCogs;
-    const slow=product===`Anti-infectives`?.26:.13;
+    const slow=index%3===1?.26:.13;
     return [product,value,value*slow,value*.13];
   });
 }
@@ -189,7 +190,7 @@ function working(d){
   ${panel(`Accounts receivable aging`,bars(`Receivable aging`,debt),`Aged by days past due · ${currency()}`)}
   ${panel(`Largest overdue customers`,table(`Overdue customers`,[plain(`Demo account`),money(`Past due >60 days`)],merchants.map((name,i)=>[name,overdue*[.34,.27,.22,.17][i]])),`Reconciles to the 61+ day buckets`)}
   ${panel(`Supplier obligations`,table(`Supplier obligations`,[plain(`Payment window`),money(`Payables`)],[[`Next 7 days`,d.wc.ap*.22],[`8–30 days`,d.wc.ap*.39],[`31–60 days`,d.wc.ap*.27],[`Later`,d.wc.ap*.12]]),`Open amounts by due window · ${currency()}`)}
-  ${panel(`Inventory health`,table(`Inventory health`,[plain(`Product`),money(`Stock value`),money(`Slow-moving`),money(`Expires in 90 days`)],inventoryRows(d)),`Risk categories can overlap · ${currency()}`,true)}</div>`;
+  ${panel(`Inventory health`,table(`Inventory health`,[plain(`Product`),money(`Stock value`),money(`Slow-moving`),money(`Expires in 90 days`)],inventoryRows(d),true),`Risk categories can overlap · ${currency()}`,true)}</div>`;
 }
 function forecast(){
   const latest=fyRows(state,`forecast`), previous=fyRows(state,`previous`);
@@ -205,8 +206,8 @@ function manufacturing(d){
     const b=statement(d.base.filter(r=>r.product===product.name));
     return [product.name,a.material,b.material,a.material-b.material,a.conversion,b.conversion,a.conversion-b.conversion];
   });
-  return `<div class="details">${panel(`Material and manufacturing costs`,table(`Production costs`,[plain(`Product`),...`Materials actual|Materials reference|Materials difference|Manufacturing actual|Manufacturing reference|Manufacturing difference`.split(`|`).map(money)],categories),`Compared with ${references[state.compare]} · ${currency()}`,true)}
-  ${panel(`Inventory exposure`,table(`Inventory exposure`,[plain(`Product`),money(`Stock value`),money(`Slow-moving`),money(`Expires in 90 days`)],inventoryRows(d)),`Risk categories can overlap · ${currency()}`,true)}</div>`;
+  return `<div class="details">${panel(`Material and manufacturing costs`,table(`Production costs`,[plain(`Product`),...`Materials actual|Materials reference|Materials difference|Manufacturing actual|Manufacturing reference|Manufacturing difference`.split(`|`).map(money)],categories,true),`Compared with ${references[state.compare]} · ${currency()}`,true)}
+  ${panel(`Inventory exposure`,table(`Inventory exposure`,[plain(`Product`),money(`Stock value`),money(`Slow-moving`),money(`Expires in 90 days`)],inventoryRows(d),true),`Risk categories can overlap · ${currency()}`,true)}</div>`;
 }
 function capex(){
   if(state.market)return noMarket(`CapEx & Commitments`);
@@ -345,6 +346,17 @@ document.addEventListener(`keydown`,e=>{
   if(e.key===`Escape`&&$(`menu`).getAttribute(`aria-expanded`)===`true`){setMenu(false);$(`menu`).focus();}
 });
 $(`sections`).addEventListener(`click`,e=>{if(e.target.closest(`a`))setMenu(false);});
+$(`view`).addEventListener(`input`,event=>{
+  if(!event.target.matches(`[data-product-search]`))return;
+  const panel=event.target.closest(`.panel`);
+  const query=event.target.value.trim().toLowerCase();
+  let visible=0;
+  for(const row of panel.querySelectorAll(`tbody tr`)){
+    row.hidden=!row.cells[0].textContent.toLowerCase().includes(query);
+    if(!row.hidden)visible++;
+  }
+  panel.querySelector(`[data-product-count]`).textContent=`${visible} products`;
+});
 $(`csv`).addEventListener(`click`,exportCsv);
 $(`pdf`).addEventListener(`click`,printExecutive);
 window.addEventListener(`hashchange`,()=>{update();setMenu(false);window.scrollTo(0,0);});
