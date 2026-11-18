@@ -4,14 +4,14 @@ import {
 } from "./model.js";
 
 const views = {
-  overview:[`Executive Overview`,`◫`,`Profitability, liquidity and priorities at a glance.`],
-  profit:[`P&L & Profitability`,`▥`,`Trace the operating result from revenue and gross margin to EBITDA.`],
-  cash:[`Cash & Treasury`,`◒`,`Follow cash receipts, payments and closing balances through year-end.`],
-  working:[`Working Capital`,`⟳`,`Review receivables, inventory and supplier obligations.`],
-  forecast:[`Budget & Forecast`,`↗`,`Review the latest full-year outlook and changes since the previous forecast.`],
-  manufacturing:[`Manufacturing & Inventory`,`▧`,`Identify the categories driving cost and stock exposure.`],
-  capex:[`CapEx & Commitments`,`◇`,`Review spend, open commitments and headroom against project budgets.`],
-  close:[`Financial Close`,`✓`,`Track entity close status and reconcile the consolidated figures.`],
+  overview:[`Executive Overview`,`dashboard`,`Profitability, liquidity and priorities at a glance.`],
+  profit:[`P&L & Profitability`,`monitoring`,`Trace the operating result from revenue and gross margin to EBITDA.`],
+  cash:[`Cash & Treasury`,`account_balance`,`Follow cash receipts, payments and closing balances through year-end.`],
+  working:[`Working Capital`,`currency_exchange`,`Review receivables, inventory and supplier obligations.`],
+  forecast:[`Budget & Forecast`,`query_stats`,`Review the latest full-year outlook and changes since the previous forecast.`],
+  manufacturing:[`Manufacturing & Inventory`,`precision_manufacturing`,`Identify the categories driving cost and stock exposure.`],
+  capex:[`CapEx & Commitments`,`business_center`,`Review spend, open commitments and headroom against project budgets.`],
+  close:[`Financial Close`,`fact_check`,`Track entity close status and reconcile the consolidated figures.`],
 };
 
 const $ = id=>document.getElementById(id);
@@ -56,8 +56,8 @@ function table(title, columns, rows){
     return `<td ${col.format===String?``:`data-number`}>${display}</td>`;
   }).join(``)}</tr>`).join(``)}</tbody></table></div>`;
 }
-function panel(title,body,caption=``,wide=false){
-  return `<article class="panel${wide?` full`:``}"><header><div><h2>${esc(title)}</h2>${caption?`<p class="caption">${esc(caption)}</p>`:``}</div></header>${body}</article>`;
+function panel(title,body,caption=``,wide=false,emphasized=false){
+  return `<article class="panel${wide?` full`:``}${emphasized?` panel-emphasis`:``}"><header><div><h2>${esc(title)}</h2>${caption?`<p class="caption">${esc(caption)}</p>`:``}</div></header>${body}</article>`;
 }
 function bars(title,rows,format=cash){
   blocks.push({title,columns:[plain(`Category`),column(`Value`,format)],rows});
@@ -88,12 +88,12 @@ const merchants = [`Demo Pharmacy Network`,`Demo Hospital Supply`,`Demo Wholesal
 const dateAt=(month,day)=>Date.UTC(2026,month,day);
 const displayDate=new Intl.DateTimeFormat(`en-GB`,{day:`numeric`,month:`short`,timeZone:`UTC`});
 const metricInfo=[
-  {key:`revenue`,label:`Net Revenue`,page:`profit`,format:cash},
-  {key:`margin`,label:`Gross Margin`,page:`profit`,format:percent,delta:points},
-  {key:`ebitda`,label:`EBITDA`,page:`profit`,format:cash},
-  {key:`operating`,label:`Operating Cash Flow`,page:`cash`,format:cash,entityOnly:true},
-  {key:`closing`,label:`Available Cash`,page:`cash`,format:cash,entityOnly:true,stock:true},
-  {key:`nwc`,label:`Net Working Capital`,page:`working`,format:cash,entityOnly:true,stock:true},
+  {key:`revenue`,icon:`monetization_on`,label:`Net Revenue`,page:`profit`,format:cash},
+  {key:`margin`,icon:`pie_chart`,label:`Gross Margin`,page:`profit`,format:percent,delta:points},
+  {key:`ebitda`,icon:`monitoring`,label:`EBITDA`,page:`profit`,format:cash},
+  {key:`operating`,icon:`payments`,label:`Operating Cash Flow`,page:`cash`,format:cash,entityOnly:true},
+  {key:`closing`,icon:`account_balance_wallet`,label:`Available Cash`,page:`cash`,format:cash,entityOnly:true,stock:true},
+  {key:`nwc`,icon:`currency_exchange`,label:`Net Working Capital`,page:`working`,format:cash,entityOnly:true,stock:true},
 ];
 function sectionData(){
   const month=state.month;
@@ -132,14 +132,14 @@ function overview(d){
     const visible=!state.market||!m.entityOnly;
     const delta=current[m.key]-reference[m.key];
     const marker=m.key===`nwc`?``:delta<0?`bad`:`good`;
-    return `<a class="metric" href="${esc(hashFor(m.page,{metric:m.key}))}"><span class="metric-label">${esc(m.label)} ↗</span><strong class="metric-value">${visible?m.format(current[m.key]):`—`}</strong><small class="${marker}">${visible?`${sign(delta,m.delta||m.format)} vs ${references[state.compare]}`:`Company-level measure`}</small><small>${visible?m.stock?`Month-end balance`:`YTD ${m.format(ytd[m.key])}`:`See company view`}</small></a>`;
+    return `<a class="metric" href="${esc(hashFor(m.page,{metric:m.key}))}"><span class="metric-icon material-symbols-outlined" aria-hidden="true">${m.icon}</span><span class="metric-label">${esc(m.label)}</span><strong class="metric-value">${visible?m.format(current[m.key]):`—`}</strong><small class="${marker}">${visible?`${sign(delta,m.delta||m.format)} vs ${references[state.compare]}`:`Company-level measure`}</small><small>${visible?m.stock?`Month-end balance`:`YTD ${m.format(ytd[m.key])}`:`See company view`}</small></a>`;
   }).join(``);
   const summaries=alerts(d);
   blocks.push({title:`Executive KPIs`,columns:[plain(`KPI`),plain(`Actual`),plain(`Reference`),plain(`YTD`)],rows:metricInfo.filter(m=>!state.market||!m.entityOnly).map(m=>[m.label,m.format(current[m.key]),m.format(reference[m.key]),m.stock?`Month-end`:m.format(ytd[m.key])])});
   blocks.push({title:`Priority watchlist`,columns:[plain(`Issue`),money(`Impact`),plain(`Due`),plain(`Reason`)],rows:summaries.map(a=>[a.label,a.impact,displayDate.format(a.due),a.reason])});
   return `<div class="cards">${cards}</div><div class="rail">${panel(`Profitability vs ${references[state.compare]}`,bars(`EBITDA comparison`,[[`Actual EBITDA`,d.actual.ebitda],[references[state.compare],d.target.ebitda]])+`<a class="inline" href="${esc(hashFor(`profit`,{metric:`ebitda`}))}">Explore EBITDA drivers →</a>`,`Variance ${sign(d.actual.ebitda-d.target.ebitda,cash)} ${currency()}`)}
   ${state.market?noMarket(`Cash through year-end`):panel(`Cash through year-end`,bars(`Closing cash`,d.schedule.slice(state.month).map(r=>[`${r.label} ${r.forecast?`Fcst`:`Act`}`,r.closing]))+`<a class="inline" href="${esc(hashFor(`cash`,{metric:`closing`}))}">View cash schedule →</a>`,`Closing cash · ${currency()}`)}
-  ${panel(`Needs attention`,summaries.slice(0,3).map(a=>`<a class="flag" href="${esc(hashFor(a.page,{metric:a.metric}))}"><strong>${esc(a.label)}</strong><span>${cash(a.impact)} ${currency()} · ${displayDate.format(a.due)}</span><span>${esc(a.reason)}</span></a>`).join(``),`Ranked by financial impact and days to due date`)}</div>`;
+  ${panel(`Needs attention`,summaries.slice(0,3).map(a=>`<a class="flag" href="${esc(hashFor(a.page,{metric:a.metric}))}"><strong><span class="material-symbols-outlined" aria-hidden="true">warning</span>${esc(a.label)}</strong><span>${cash(a.impact)} ${currency()} · ${displayDate.format(a.due)}</span><span>${esc(a.reason)}</span></a>`).join(``),`Ranked by financial impact and days to due date`,false,true)}</div>`;
 }
 
 function profit(d){
@@ -254,7 +254,8 @@ function update(){
   const [title,,subtitle]=views[state.page];
   const label=metricInfo.find(m=>m.key===state.metric)?.label||(state.metric===`inventory`?`Inventory exposure`:``);
   $(`scope-label`).textContent=[entity()?.name||`Dar Al Dawa Group`,state.market].filter(Boolean).join(` / `);
-  $(`page-title`).textContent=title;
+  $(`page-title`).textContent=state.page===`overview`?`CFO Dashboard`:title;
+  $(`section-title`).textContent=title;
   $(`subtitle`).textContent=`${label?`${label} · `:``}${subtitle}`;
   $(`period`).innerHTML=months.slice(0,closedMonth+1).map((m,i)=>option(i+1,`${m} 2026${i===closedMonth?` · latest close`:``}`,state.month===i)).join(``);
   $(`compare`).value=state.compare;
@@ -263,7 +264,7 @@ function update(){
   $(`market`).disabled=!entity();
   $(`currency`).innerHTML=option(`usd`,`USD`,!state.local)+(entity()?option(`local`,`${entity().currency} · local`,state.local):``);
   $(`currency`).disabled=!entity();
-  $(`sections`).innerHTML=Object.entries(views).map(([key,[name,icon]])=>`<a href="${esc(hashFor(key,{metric:``}))}"${key===state.page?` aria-current="page"`:``}><span class="nav-icon" aria-hidden="true">${icon}</span>${esc(name)}</a>`).join(``);
+  $(`sections`).innerHTML=Object.entries(views).map(([key,[name,icon]])=>`<a href="${esc(hashFor(key,{metric:``}))}" aria-label="${esc(name)}" title="${esc(name)}"${key===state.page?` aria-current="page"`:``}><span class="nav-icon material-symbols-outlined" aria-hidden="true">${icon}</span><span class="nav-label">${esc(name)}</span></a>`).join(``);
   $(`view`).innerHTML=renderers[state.page](d);
 
   $(`csv`).disabled=!blocks.length;
@@ -317,6 +318,7 @@ function printExecutive(){
 const applyTheme=dark=>{
   document.documentElement.classList.toggle(`dark`,dark);
   $(`theme`).setAttribute(`aria-pressed`,String(dark));
+  $(`theme-icon`).textContent=dark?`light_mode`:`dark_mode`;
 };
 try{applyTheme(localStorage.getItem(`dad-cfo-theme`)===`dark`);}catch{}
 $(`theme`).addEventListener(`click`,()=>{
@@ -330,6 +332,13 @@ $(`menu`).addEventListener(`click`,()=>{
   const open=$(`menu`).getAttribute(`aria-expanded`)!==`true`;
   setMenu(open);
   if(open)$(`sections`).querySelector(`[aria-current]`)?.focus();
+});
+$(`collapse`).addEventListener(`click`,()=>{
+  const collapse=$(`collapse`);
+  const collapsed=collapse.getAttribute(`aria-expanded`)===`true`;
+  $(`navigation`).parentElement.classList.toggle(`sidebar-collapsed`,collapsed);
+  collapse.setAttribute(`aria-expanded`,String(!collapsed));
+  collapse.setAttribute(`aria-label`,collapsed?`Expand navigation`:`Collapse navigation`);
 });
 $(`scrim`).addEventListener(`click`,()=>{setMenu(false);$(`menu`).focus();});
 document.addEventListener(`keydown`,e=>{

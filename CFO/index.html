@@ -5,35 +5,46 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#f4f6fb">
 <title>CFO Dashboard | Dar Al Dawa</title>
-<link rel="stylesheet" href="./dashboard.css">
-<script type="module" src="./dashboard.js"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&amp;display=swap">
+<link rel="stylesheet" href="./dashboard.css?v=gm">
+<script type="module" src="./dashboard.js?v=gm"></script>
 </head>
 <body>
 <div class="app">
   <aside class="sidebar" id="navigation" aria-label="Dashboard navigation">
-    <a class="brand" href="../"><span class="brand-icon">D</span><span>Dar Al Dawa<small>Executive Dashboards</small></span></a>
+    <div class="brand-row">
+      <a class="brand" href="../" aria-label="Dar Al Dawa executive portal"><img src="https://www.dadgroup.com/wp-content/uploads/2023/11/uplift-dad-website-05.png" alt="Dar Al Dawa" width="160" height="44"></a>
+      <button class="icon-button collapse" id="collapse" type="button" aria-controls="navigation" aria-expanded="true" aria-label="Collapse navigation"><span class="material-symbols-outlined" aria-hidden="true">chevron_left</span></button>
+    </div>
     <nav id="sections"></nav>
-    <a class="portal-link" href="../">← Executive portal</a>
+    <a class="portal-link" href="../" aria-label="Executive portal"><span class="material-symbols-outlined nav-icon" aria-hidden="true">grid_view</span><span class="nav-label">Executive portal</span></a>
   </aside>
   <button class="scrim" id="scrim" type="button" aria-label="Close navigation" hidden></button>
   <main>
     <header class="topbar">
-      <button class="button menu" id="menu" type="button" aria-controls="navigation" aria-expanded="false" aria-label="Open navigation">☰</button>
-      <span class="top-title">CFO Dashboard</span><span class="badge">Demo Data</span>
-      <button class="button theme" id="theme" type="button" aria-label="Toggle dark mode" aria-pressed="false">◐</button>
+      <button class="button menu" id="menu" type="button" aria-controls="navigation" aria-expanded="false" aria-label="Open navigation"><span class="material-symbols-outlined" aria-hidden="true">menu</span></button>
+      <div class="top-context"><span class="top-title" id="section-title">Executive Overview</span><span class="top-subtitle">Dar Al Dawa · Executive Dashboard</span></div>
+      <div class="top-actions">
+        <span class="badge">Demo Data</span>
+        <button class="icon-button theme" id="theme" type="button" aria-label="Toggle dark mode" aria-pressed="false"><span class="material-symbols-outlined" id="theme-icon" aria-hidden="true">dark_mode</span></button>
+        <div class="profile"><span class="avatar" aria-hidden="true">CFO</span><span class="profile-name">Chief Financial Officer</span></div>
+      </div>
     </header>
-    <div class="content">
-      <header class="hero">
-        <div><p class="eyebrow" id="scope-label">Dar Al Dawa Group</p><h1 id="page-title">Executive Overview</h1><p id="subtitle"></p></div>
-        <div class="actions"><button class="button" id="csv">Export CSV</button><button class="button primary" id="pdf">Executive PDF</button></div>
-      </header>
-      <form class="filters" id="filters">
+    <form class="filters" id="filters">
         <label>Period<select id="period"></select></label>
         <label>Compare with<select id="compare"><option value="budget">Budget</option><option value="prior">Prior year</option><option value="forecast">Forecast</option></select></label>
         <label>Company<select id="company"></select></label>
         <label>Market<select id="market"></select></label>
         <label>Currency<select id="currency"></select></label>
-      </form>
+    </form>
+    <div class="content">
+      <header class="hero">
+        <div><h1 id="page-title">CFO Dashboard</h1><p id="subtitle"></p><p class="eyebrow" id="scope-label">Dar Al Dawa Group</p></div>
+        <div class="actions">
+          <button class="button" id="csv" type="button"><span class="material-symbols-outlined" aria-hidden="true">file_download</span> Export CSV</button>
+          <button class="button primary" id="pdf" type="button"><span class="material-symbols-outlined" aria-hidden="true">ios_share</span> Executive PDF</button>
+        </div>
+      </header>
       <section id="view" aria-labelledby="page-title"></section>
       <footer>Illustrative data, entities and exchange rates for demonstration. <a href="https://www.dadgroup.com/our-presence/" target="_blank" rel="noopener">Jordan and Algeria</a> · <a href="https://www.dadgroup.com/wp-content/uploads/2026/04/Annual-report-2025.pdf" target="_blank" rel="noopener">2025 annual report</a>.</footer>
     </div>
