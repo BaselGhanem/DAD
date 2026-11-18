@@ -533,6 +533,10 @@ html :is(button, a, input, textarea):focus-visible { outline-color: var(--theme-
 .exec-markets summary{cursor:pointer}
 [data-action="report"]:disabled{opacity:.55}
 </style>
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="apple-touch-icon" href="../assets/pwa/ceo-192.png">
+<link rel="stylesheet" href="../assets/pwa/install.css?v=1">
+<script defer src="../assets/pwa/install.js?v=1"></script>
 </head>
 
 <body class="">
@@ -590,6 +594,11 @@ html :is(button, a, input, textarea):focus-visible { outline-color: var(--theme-
     <button class="nav-item " onclick="showSection('it')" id="nav-it" data-label="IT" type="button" aria-label="IT" title="IT">
       <span class="material-symbols-outlined nav-icon">terminal</span>
       <span class="nav-label">IT</span>
+    </button>
+    <button class="app-install" type="button" aria-label="Install App" title="Install App" data-install-app="CEO" hidden>
+      <span class="material-symbols-outlined app-install-icon" aria-hidden="true">install_desktop</span>
+      <span class="app-install-label">Install App</span>
+      <span class="material-symbols-outlined app-install-arrow" aria-hidden="true">arrow_outward</span>
     </button>
   </nav>
 

@@ -9,6 +9,10 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Almarai:wght@400;700;800&amp;display=swap">
 <link rel="stylesheet" href="./dashboard.css?v=info1">
 <script type="module" src="./dashboard.js?v=info2"></script>
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="apple-touch-icon" href="../assets/pwa/cfo-192.png">
+<link rel="stylesheet" href="../assets/pwa/install.css?v=1">
+<script defer src="../assets/pwa/install.js?v=1"></script>
 </head>
 <body>
 <div class="app">
@@ -18,6 +22,11 @@
       <button class="icon-button collapse" id="collapse" type="button" aria-controls="navigation" aria-expanded="true" aria-label="Collapse navigation"><span class="material-symbols-outlined" aria-hidden="true">chevron_left</span></button>
     </div>
     <nav id="sections"></nav>
+    <button class="app-install" type="button" aria-label="Install App" title="Install App" data-install-app="CFO" hidden>
+      <span class="material-symbols-outlined app-install-icon" aria-hidden="true">install_desktop</span>
+      <span class="app-install-label">Install App</span>
+      <span class="material-symbols-outlined app-install-arrow" aria-hidden="true">arrow_outward</span>
+    </button>
     <a class="portal-link" href="../" aria-label="Executive portal"><span class="material-symbols-outlined nav-icon" aria-hidden="true">grid_view</span><span class="nav-label">Executive portal</span></a>
   </aside>
   <button class="scrim" id="scrim" type="button" aria-label="Close navigation" hidden></button>

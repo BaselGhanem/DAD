@@ -1,0 +1,94 @@
+.app-install, .app-install-dialog {
+  --install-bg: #eaf7f5;
+  --install-surface: #ffffff;
+  --install-ink: #172631;
+  --install-accent: #086965;
+  --install-border: #b6dcd8;
+  --install-hover: #d8f0ed;
+}
+.dark .app-install, .dark .app-install-dialog {
+  --install-bg: #1a393e;
+  --install-surface: #192436;
+  --install-ink: #eef4fb;
+  --install-accent: #91ede3;
+  --install-border: #32615f;
+  --install-hover: #244e53;
+}
+.app-install {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: none;
+  width: calc(100% - 20px);
+  max-width: 100%;
+  min-height: 44px;
+  margin: 8px 10px;
+  padding: 6px 10px;
+  border: 1px solid var(--install-border);
+  border-radius: 11px;
+  background: var(--install-bg);
+  color: var(--install-accent);
+  font: 600 13px/1.35 Poppins, system-ui, sans-serif;
+  text-align: start;
+  cursor: pointer;
+  transition: background-color .18s, border-color .18s;
+}
+.app-install[hidden] { display: none; }
+.app-install:hover { background: var(--install-hover); border-color: var(--install-accent); }
+.app-install:focus-visible, .app-install-done:focus-visible { outline: 2px solid var(--install-accent); outline-offset: 2px; }
+.app-install-icon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 29px;
+  height: 29px;
+  border-radius: 8px;
+  background: var(--install-surface);
+  color: var(--install-accent);
+  font-size: 18px;
+}
+.app-install-arrow { margin-inline-start: auto; font-size: 15px; }
+@media (min-width: 821px) {
+  .sidebar-collapsed .app-install { justify-content: center; padding-inline: 4px; }
+  .sidebar-collapsed :is(.app-install-label,.app-install-arrow) { display: none; }
+}
+@media (min-width: 768px) {
+  #sidebar.collapsed .app-install { justify-content: center; padding-inline: 4px; }
+  #sidebar.collapsed :is(.app-install-label,.app-install-arrow) { display: none; }
+}
+
+.app-install-dialog {
+  width: min(440px, calc(100% - 28px));
+  max-height: calc(100dvh - 28px);
+  margin: auto;
+  padding: 22px;
+  border: 1px solid var(--install-border);
+  border-radius: 18px;
+  background: var(--install-surface);
+  color: var(--install-ink);
+  box-shadow: 0 24px 75px #09172855;
+  font: 400 14px/1.65 Poppins, system-ui, sans-serif;
+}
+.app-install-dialog::backdrop { background: #101a2b99; }
+.app-install-dialog-heading { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.app-install-dialog-heading .app-install-icon { background: var(--install-bg); }
+.app-install-dialog h2 { margin: 0; color: inherit; font: 700 19px/1.3 Poppins, system-ui, sans-serif; }
+.app-install-dialog p { margin: 0; }
+.app-install-dialog ul { display: grid; gap: 7px; margin: 10px 0 16px; padding-inline-start: 20px; list-style: disc; }
+.app-install-done {
+  padding: 7px 14px;
+  border: 1px solid var(--install-border);
+  border-radius: 8px;
+  background: var(--install-bg);
+  color: var(--install-accent);
+  font-weight: 600;
+  cursor: pointer;
+}
+.app-install-done:hover { background: var(--install-hover); }
+
+@media (display-mode: standalone), (display-mode: minimal-ui), (display-mode: window-controls-overlay), (display-mode: fullscreen), print {
+  .app-install { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .app-install { transition: none; }
+}
