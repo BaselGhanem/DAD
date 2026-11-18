@@ -6,8 +6,9 @@
 <meta name="theme-color" content="#f4f6fb">
 <title>CFO Dashboard | Dar Al Dawa</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&amp;display=swap">
-<link rel="stylesheet" href="./dashboard.css?v=aligned">
-<script type="module" src="./dashboard.js?v=aligned"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Almarai:wght@400;700;800&amp;display=swap">
+<link rel="stylesheet" href="./dashboard.css?v=info1">
+<script type="module" src="./dashboard.js?v=info1"></script>
 </head>
 <body>
 <div class="app">
@@ -48,6 +49,21 @@
     </div>
   </main>
 </div>
+<dialog class="cfo-help" id="cfo-help" lang="ar-JO" dir="rtl" aria-labelledby="help-title">
+  <div class="help-sheet">
+    <header class="help-header">
+      <span class="help-symbol" aria-hidden="true">i</span>
+      <h2 id="help-title"></h2>
+      <form method="dialog">
+        <button class="icon-button help-close" type="submit" aria-label="اغلاق الشرح" autofocus><span aria-hidden="true">×</span></button>
+      </form>
+    </header>
+    <div class="help-scroll" id="help-scroll" tabindex="0" role="region" aria-labelledby="help-title">
+      <p id="help-intro"></p>
+      <dl id="help-details"></dl>
+    </div>
+  </div>
+</dialog>
 <p class="sr-only" id="status" role="status"></p>
 <noscript>This interactive dashboard requires JavaScript.</noscript>
 </body>

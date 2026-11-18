@@ -3,6 +3,7 @@ import {
   statement, bridge, financials, intercompany, fyRows, workingCapital, cashSchedule, capexProjects, reportWindows, periodFinancials, cashForPeriods,
 } from "./model.js?v=aligned";
 import {executivePdf} from "./executive-pdf.js?v=3";
+import {explanations} from "./help.js?v=1";
 
 const views = {
   overview:[`Executive Overview`,`dashboard`,`Profitability, liquidity and priorities at a glance.`],
@@ -60,8 +61,11 @@ function table(title, columns, rows, productSearch=false){
     return `<td ${col.format===String?``:`data-number`}>${display}</td>`;
   }).join(``)}</tr>`).join(``)}</tbody></table></div>`;
 }
-function panel(title,body,caption=``,wide=false,emphasized=false){
-  return `<article class="panel${wide?` full`:``}${emphasized?` panel-emphasis`:``}"><header><div><h2>${esc(title)}</h2>${caption?`<p class="caption">${esc(caption)}</p>`:``}</div></header>${body}</article>`;
+function infoButton(key,title){
+  return `<button type="button" class="cfo-info" data-info="${key}" aria-label="${esc(`About ${title}`)}" aria-haspopup="dialog" aria-controls="cfo-help"><span class="info-mark" aria-hidden="true">i</span></button>`;
+}
+function panel(info,title,body,caption=``,wide=false,emphasized=false){
+  return `<article class="panel${wide?` full`:``}${emphasized?` panel-emphasis`:``}"><header><div><h2>${esc(title)}</h2>${caption?`<p class="caption">${esc(caption)}</p>`:``}</div>${infoButton(info,title)}</header>${body}</article>`;
 }
 function bars(title,rows,format=cash){
   blocks.push({title,columns:[plain(`Category`),column(`Value`,format)],rows});
@@ -85,7 +89,7 @@ function waterfall(start, contributions, end, title, labels=[`Reference EBITDA`,
     return `<div class="chart-row"><span>${esc(label)}</span><span class="track" aria-hidden="true"><i class="${value<0?`negative`:``}" style="margin-left:${offset}%;width:${width}%"></i></span><b>${i===0||i===steps.length-1?cash(value):sign(value,cash)}</b></div>`;
   }).join(``)}</div>`;
 }
-const noMarket = text=>panel(text,`<p class="empty">This measure is reported at company and group level.</p><a href="${esc(hashFor(state.page,{market:``}))}">${state.company?`View company totals`:`View group totals`}</a>`);
+const noMarket = text=>panel(`companyOnly`,text,`<p class="empty">This measure is reported at company and group level.</p><a href="${esc(hashFor(state.page,{market:``}))}">${state.company?`View company totals`:`View group totals`}</a>`);
 const stat=(label,value)=>`<div class="statline"><span>${esc(label)}</span><strong>${esc(value)}</strong></div>`;
 const aggregate=(rows, key, value)=>Array.from(rows.reduce((m,r)=>m.set(r[key],(m.get(r[key])||0)+value(r)),new Map()));
 const merchants = [`Pharmacy Network`,`Hospital Supply`,`Wholesale Group`,`Other customer accounts`];
@@ -135,14 +139,14 @@ function overview(d){
     const visible=!state.market||!m.entityOnly;
     const delta=current[m.key]-reference[m.key];
     const marker=m.key===`nwc`?``:delta<0?`bad`:`good`;
-    return `<a class="metric" href="${esc(hashFor(m.page,{metric:m.key}))}"><span class="metric-icon material-symbols-outlined" aria-hidden="true">${m.icon}</span><span class="metric-label">${esc(m.label)}</span><strong class="metric-value">${visible?m.format(current[m.key]):`—`}</strong><small class="${marker}">${visible?`${sign(delta,m.delta||m.format)} vs ${references[state.compare]}`:`Company-level measure`}</small><small>${visible?m.stock?`Month-end balance`:`YTD ${m.format(ytd[m.key])}`:`Clear market to view`}</small></a>`;
+    return `<div class="metric-shell"><a class="metric" href="${esc(hashFor(m.page,{metric:m.key}))}"><span class="metric-icon material-symbols-outlined" aria-hidden="true">${m.icon}</span><span class="metric-label">${esc(m.label)}</span><strong class="metric-value">${visible?m.format(current[m.key]):`—`}</strong><small class="${marker}">${visible?`${sign(delta,m.delta||m.format)} vs ${references[state.compare]}`:`Company-level measure`}</small><small>${visible?m.stock?`Month-end balance`:`YTD ${m.format(ytd[m.key])}`:`Clear market to view`}</small></a>${infoButton(m.key,m.label)}</div>`;
   }).join(``);
   const summaries=alerts(d);
   blocks.push({title:`Executive KPIs`,columns:[plain(`KPI`),plain(currentLabel()),plain(`Reference`),plain(`YTD`)],rows:metricInfo.filter(m=>!state.market||!m.entityOnly).map(m=>[m.label,m.format(current[m.key]),m.format(reference[m.key]),m.stock?`Month-end`:m.format(ytd[m.key])])});
   blocks.push({title:`Priority watchlist`,columns:[plain(`Issue`),money(`Impact`),plain(`Due`),plain(`Reason`)],rows:summaries.map(a=>[a.label,a.impact,displayDate.format(a.due),a.reason])});
-  return `<div class="cards">${cards}</div><div class="rail">${panel(`Profitability vs ${references[state.compare]}`,bars(`EBITDA comparison`,[[state.window===`Q4`?`Q4 EBITDA outlook`:`Actual EBITDA`,d.actual.ebitda],[references[state.compare],d.target.ebitda]])+`<a class="inline" href="${esc(hashFor(`profit`,{metric:`ebitda`}))}">Explore EBITDA drivers →</a>`,`Variance ${sign(d.actual.ebitda-d.target.ebitda,cash)} ${currency()}`)}
-  ${state.market?noMarket(`Cash through year-end`):panel(`Cash through year-end`,bars(`Closing cash`,d.schedule.slice(state.month).map(r=>[`${r.label} ${r.forecast?`Fcst`:`Act`}`,r.closing]))+`<a class="inline" href="${esc(hashFor(`cash`,{metric:`closing`}))}">View cash schedule →</a>`,`Closing cash · ${currency()}`)}
-  ${panel(`Needs attention`,summaries.slice(0,3).map(a=>`<a class="flag" href="${esc(hashFor(a.page,{metric:a.metric}))}"><strong><span class="material-symbols-outlined" aria-hidden="true">warning</span>${esc(a.label)}</strong><span>${cash(a.impact)} ${currency()} · ${displayDate.format(a.due)}</span><span>${esc(a.reason)}</span></a>`).join(``),`Ranked by financial impact and days to due date`,false,true)}</div>`;
+  return `<div class="cards">${cards}</div><div class="rail">${panel(`profitSummary`,`Profitability vs ${references[state.compare]}`,bars(`EBITDA comparison`,[[state.window===`Q4`?`Q4 EBITDA outlook`:`Actual EBITDA`,d.actual.ebitda],[references[state.compare],d.target.ebitda]])+`<a class="inline" href="${esc(hashFor(`profit`,{metric:`ebitda`}))}">Explore EBITDA drivers →</a>`,`Variance ${sign(d.actual.ebitda-d.target.ebitda,cash)} ${currency()}`)}
+  ${state.market?noMarket(`Cash through year-end`):panel(`yearCash`,`Cash through year-end`,bars(`Closing cash`,d.schedule.slice(state.month).map(r=>[`${r.label} ${r.forecast?`Fcst`:`Act`}`,r.closing]))+`<a class="inline" href="${esc(hashFor(`cash`,{metric:`closing`}))}">View cash schedule →</a>`,`Closing cash · ${currency()}`)}
+  ${panel(`priorities`,`Needs attention`,summaries.slice(0,3).map(a=>`<a class="flag" href="${esc(hashFor(a.page,{metric:a.metric}))}"><strong><span class="material-symbols-outlined" aria-hidden="true">warning</span>${esc(a.label)}</strong><span>${cash(a.impact)} ${currency()} · ${displayDate.format(a.due)}</span><span>${esc(a.reason)}</span></a>`).join(``),`Ranked by financial impact and days to due date`,false,true)}</div>`;
 }
 
 function profit(d){
@@ -157,10 +161,10 @@ function profit(d){
   });
   const internal=d.internal;
   if(internal)breakdown.push([`Intragroup sales at cost`,internal]);
-  return `${state.product?`<p class="product-scope">Product <strong>${esc(state.product)}</strong> · <a href="${esc(hashFor(`profit`,{product:``}))}">Show all products</a></p>`:``}<div class="details">${panel(`Income statement`,table(`Income statement`,[`Line item`,currentLabel(),references[state.compare],`Difference`].map(plain),rows),`P&L · ${currency()}`)}
-  ${panel(`EBITDA variance bridge`,waterfall(d.target.ebitda,d.contributions,d.actual.ebitda,`EBITDA variance bridge`,[`Reference EBITDA`,state.window===`Q4`?`Q4 EBITDA outlook`:`Actual EBITDA`]),`${references[state.compare]} to ${state.window===`Q4`?`outlook`:`actual`} · ${currency()}`)}
-  ${panel(`Revenue by ${groupBy}`,table(`Revenue by ${groupBy}`,[plain(`Scope`),money(`Net revenue`)],breakdown,groupBy===`product`),groupBy===`product`?`External net revenue by product · ${currency()}`:`Select a company or market to drill down`)}
-  ${panel(`Product profitability`,table(`Product profitability`,[plain(`Product`),money(`External net revenue`),percentage(`GM`),money(`Materials`),money(`Manufacturing`),money(`EBITDA variance`)],productRows,true),`External sales and production costs · ${currency()}`,true)}</div>`;
+  return `${state.product?`<p class="product-scope">Product <strong>${esc(state.product)}</strong> · <a href="${esc(hashFor(`profit`,{product:``}))}">Show all products</a></p>`:``}<div class="details">${panel(`income`,`Income statement`,table(`Income statement`,[`Line item`,currentLabel(),references[state.compare],`Difference`].map(plain),rows),`P&L · ${currency()}`)}
+  ${panel(`profitBridge`,`EBITDA variance bridge`,waterfall(d.target.ebitda,d.contributions,d.actual.ebitda,`EBITDA variance bridge`,[`Reference EBITDA`,state.window===`Q4`?`Q4 EBITDA outlook`:`Actual EBITDA`]),`${references[state.compare]} to ${state.window===`Q4`?`outlook`:`actual`} · ${currency()}`)}
+  ${panel(`revenueBreakdown`,`Revenue by ${groupBy}`,table(`Revenue by ${groupBy}`,[plain(`Scope`),money(`Net revenue`)],breakdown,groupBy===`product`),groupBy===`product`?`External net revenue by product · ${currency()}`:`Select a company or market to drill down`)}
+  ${panel(`productProfit`,`Product profitability`,table(`Product profitability`,[plain(`Product`),money(`External net revenue`),percentage(`GM`),money(`Materials`),money(`Manufacturing`),money(`EBITDA variance`)],productRows,true),`External sales and production costs · ${currency()}`,true)}</div>`;
 }
 function treasury(d){
   if(state.market)return noMarket(`Cash & Treasury`);
@@ -168,11 +172,11 @@ function treasury(d){
   const periodCash=cashForPeriods(d.schedule,d.periods);
   const cashRows=dates.map(r=>[`${r.label} ${r.forecast?`Forecast`:`Actual`}`,r.opening,r.receipts,r.suppliers,r.payroll,r.taxes,r.other,r.operating,r.capex,r.debt,r.closing]);
   const lines=[[`Customer collections`,`receipts`],[`Supplier payments`,`suppliers`],[`Payroll`,`payroll`],[`Tax payments`,`taxes`],[`Other operating payments`,`other`],[`Investing / CapEx`,`capex`],[`Debt service`,`debt`]];
-  return `<div class="details">${panel(`Selected-period cash summary`,table(`Cash summary`,[plain(`Measure`),money(`Period value`)],[[`Operating Cash Flow`,periodCash.operating],[`Available Cash at Period End`,periodCash.closing]]),`${periodLabel()} · ${currency()}`,true)}
-  ${panel(`Month-end cash`,bars(`Monthly closing cash`,dates.map(r=>[`${r.label} ${r.forecast?`Forecast`:`Actual`}`,r.closing])),`Closed actuals, then forecast after ${months[closedMonth]}`)}
-  ${panel(`Closing cash vs ${references[state.compare]}`,table(`Closing cash comparison`,[plain(`Month`),money(`Closing cash`),money(references[state.compare])],dates.map(r=>[r.label,r.closing,d.baseCash[r.month].closing])),`Balances · ${currency()}`)}
-  ${panel(`Monthly cash flow schedule`,table(`Cash flow schedule`,[plain(`Month`),...`Opening|Collections|Suppliers|Payroll|Taxes|Other operating|Operating cash flow|CapEx|Debt service|Closing`.split(`|`).map(money)],cashRows),`Payments shown as outflows · ${currency()}`,true)}
-  ${panel(`Selected-period sources and uses`,table(`Cash sources and uses`,[plain(`Cash line`),money(currentLabel()),money(references[state.compare])],lines.map(([label,key])=>[label,d.periods.reduce((sum,m)=>sum+d.schedule[m][key],0),d.periods.reduce((sum,m)=>sum+d.baseCash[m][key],0)])),`Detail by cash-flow category · ${currency()}`)}</div>`;
+  return `<div class="details">${panel(`cashSummary`,`Selected-period cash summary`,table(`Cash summary`,[plain(`Measure`),money(`Period value`)],[[`Operating Cash Flow`,periodCash.operating],[`Available Cash at Period End`,periodCash.closing]]),`${periodLabel()} · ${currency()}`,true)}
+  ${panel(`monthlyCash`,`Month-end cash`,bars(`Monthly closing cash`,dates.map(r=>[`${r.label} ${r.forecast?`Forecast`:`Actual`}`,r.closing])),`Closed actuals, then forecast after ${months[closedMonth]}`)}
+  ${panel(`cashReference`,`Closing cash vs ${references[state.compare]}`,table(`Closing cash comparison`,[plain(`Month`),money(`Closing cash`),money(references[state.compare])],dates.map(r=>[r.label,r.closing,d.baseCash[r.month].closing])),`Balances · ${currency()}`)}
+  ${panel(`cashSchedule`,`Monthly cash flow schedule`,table(`Cash flow schedule`,[plain(`Month`),...`Opening|Collections|Suppliers|Payroll|Taxes|Other operating|Operating cash flow|CapEx|Debt service|Closing`.split(`|`).map(money)],cashRows),`Payments shown as outflows · ${currency()}`,true)}
+  ${panel(`cashSources`,`Selected-period sources and uses`,table(`Cash sources and uses`,[plain(`Cash line`),money(currentLabel()),money(references[state.compare])],lines.map(([label,key])=>[label,d.periods.reduce((sum,m)=>sum+d.schedule[m][key],0),d.periods.reduce((sum,m)=>sum+d.baseCash[m][key],0)])),`Detail by cash-flow category · ${currency()}`)}</div>`;
 }
 
 function inventoryRows(d){
@@ -190,19 +194,19 @@ function working(d){
   ];
   const overdue=d.wc.ar*.22;
   return `<div class="details">
-  ${state.market?noMarket(`Cash conversion cycle`):panel(`Cash conversion cycle`,table(`Cash conversion cycle`,[plain(`Metric`),dayColumn(currentLabel()),dayColumn(references[state.compare])],[`dso`,`dio`,`dpo`,`ccc`].map(k=>[k.toUpperCase(),d.wc[k],d.baseWC[k]])),`Month-end balances divided by current-month activity × 30`)}
-  ${panel(`Accounts receivable aging`,bars(`Receivable aging`,debt),`Aged by days past due · ${currency()}`)}
-  ${panel(`Largest overdue customers`,table(`Overdue customers`,[plain(`Account`),money(`Past due >60 days`)],merchants.map((name,i)=>[name,overdue*[.34,.27,.22,.17][i]])),`Reconciles to the 61+ day buckets`)}
-  ${panel(`Supplier obligations`,table(`Supplier obligations`,[plain(`Payment window`),money(`Payables`)],[[`Next 7 days`,d.wc.ap*.22],[`8–30 days`,d.wc.ap*.39],[`31–60 days`,d.wc.ap*.27],[`Later`,d.wc.ap*.12]]),`Open amounts by due window · ${currency()}`)}
-  ${panel(`Inventory health`,table(`Inventory health`,[plain(`Product`),money(`Stock value`),money(`Slow-moving`),money(`Expires in 90 days`)],inventoryRows(d),true),`Risk categories can overlap · ${currency()}`,true)}</div>`;
+  ${state.market?noMarket(`Cash conversion cycle`):panel(`ccc`,`Cash conversion cycle`,table(`Cash conversion cycle`,[plain(`Metric`),dayColumn(currentLabel()),dayColumn(references[state.compare])],[`dso`,`dio`,`dpo`,`ccc`].map(k=>[k.toUpperCase(),d.wc[k],d.baseWC[k]])),`Month-end balances divided by current-month activity × 30`)}
+  ${panel(`aging`,`Accounts receivable aging`,bars(`Receivable aging`,debt),`Aged by days past due · ${currency()}`)}
+  ${panel(`overdue`,`Largest overdue customers`,table(`Overdue customers`,[plain(`Account`),money(`Past due >60 days`)],merchants.map((name,i)=>[name,overdue*[.34,.27,.22,.17][i]])),`Reconciles to the 61+ day buckets`)}
+  ${panel(`suppliers`,`Supplier obligations`,table(`Supplier obligations`,[plain(`Payment window`),money(`Payables`)],[[`Next 7 days`,d.wc.ap*.22],[`8–30 days`,d.wc.ap*.39],[`31–60 days`,d.wc.ap*.27],[`Later`,d.wc.ap*.12]]),`Open amounts by due window · ${currency()}`)}
+  ${panel(`stockHealth`,`Inventory health`,table(`Inventory health`,[plain(`Product`),money(`Stock value`),money(`Slow-moving`),money(`Expires in 90 days`)],inventoryRows(d),true),`Risk categories can overlap · ${currency()}`,true)}</div>`;
 }
 function forecast(){
   const latest=fyRows(state,`forecast`), previous=fyRows(state,`previous`);
   const a=statement(latest), b=statement(previous), plan=statement(tradeRows(state,range(11,true),`budget`));
   const lines=[[`External net revenue`,`revenue`],[`Gross profit`,`gross`],[`Operating expenses`,`opex`],[`EBITDA`,`ebitda`]];
-  return `<div class="details">${panel(`FY 2026 outlook`,table(`Full-year outlook`,[plain(`Measure`),money(`Current`),money(`Previous`),money(`Movement`),money(`Budget`),money(`vs Budget`)],lines.map(([label,k])=>[label,a[k],b[k],a[k]-b[k],plan[k],a[k]-plan[k]])),`Actuals through Oct plus Nov–Dec forecast · ${currency()}`,true)}
-  ${panel(`What moved the forecast`,waterfall(b.ebitda,bridge(latest,previous),a.ebitda,`Forecast EBITDA bridge`,[`Previous EBITDA`,`Current EBITDA`]),`Previous to current forecast · ${currency()}`)}
-  ${panel(`Forecast basis`,stat(`Closed actuals`,`Jan–Oct 2026`)+stat(`Forward months`,`Nov–Dec 2026`)+stat(`Current comparison`,`Previous forecast and budget`)+`<p class="caption">The full-year comparison uses the latest forecast for the selected company and market.</p>`)}</div>`;
+  return `<div class="details">${panel(`annual`,`FY 2026 outlook`,table(`Full-year outlook`,[plain(`Measure`),money(`Current`),money(`Previous`),money(`Movement`),money(`Budget`),money(`vs Budget`)],lines.map(([label,k])=>[label,a[k],b[k],a[k]-b[k],plan[k],a[k]-plan[k]])),`Actuals through Oct plus Nov–Dec forecast · ${currency()}`,true)}
+  ${panel(`forecastBridge`,`What moved the forecast`,waterfall(b.ebitda,bridge(latest,previous),a.ebitda,`Forecast EBITDA bridge`,[`Previous EBITDA`,`Current EBITDA`]),`Previous to current forecast · ${currency()}`)}
+  ${panel(`forecastBasis`,`Forecast basis`,stat(`Closed actuals`,`Jan–Oct 2026`)+stat(`Forward months`,`Nov–Dec 2026`)+stat(`Current comparison`,`Previous forecast and budget`)+`<p class="caption">The full-year comparison uses the latest forecast for the selected company and market.</p>`)}</div>`;
 }
 function manufacturing(d){
   const categories=products.map(product=>{
@@ -210,14 +214,14 @@ function manufacturing(d){
     const b=statement(d.base.filter(r=>r.product===product.name));
     return [product.name,a.material,b.material,a.material-b.material,a.conversion,b.conversion,a.conversion-b.conversion];
   });
-  return `<div class="details">${panel(`Material and manufacturing costs`,table(`Production costs`,[plain(`Product`),...`Materials period value|Materials reference|Materials difference|Manufacturing period value|Manufacturing reference|Manufacturing difference`.split(`|`).map(money)],categories,true),`Compared with ${references[state.compare]} · ${currency()}`,true)}
-  ${panel(`Inventory exposure`,table(`Inventory exposure`,[plain(`Product`),money(`Stock value`),money(`Slow-moving`),money(`Expires in 90 days`)],inventoryRows(d),true),`Risk categories can overlap · ${currency()}`,true)}</div>`;
+  return `<div class="details">${panel(`production`,`Material and manufacturing costs`,table(`Production costs`,[plain(`Product`),...`Materials period value|Materials reference|Materials difference|Manufacturing period value|Manufacturing reference|Manufacturing difference`.split(`|`).map(money)],categories,true),`Compared with ${references[state.compare]} · ${currency()}`,true)}
+  ${panel(`stockExposure`,`Inventory exposure`,table(`Inventory exposure`,[plain(`Product`),money(`Stock value`),money(`Slow-moving`),money(`Expires in 90 days`)],inventoryRows(d),true),`Risk categories can overlap · ${currency()}`,true)}</div>`;
 }
 function capex(){
   if(state.market)return noMarket(`CapEx & Commitments`);
   const p=capexProjects(state,Math.min(state.month,closedMonth));
-  return `<div class="details">${panel(`Capital projects`,table(`Capital projects`,[plain(`Project`),money(`Annual budget`),money(`YTD spend`),money(`Open commitments`),money(`Headroom`)],p.map(row=>[row.name,row.budget,row.actual,row.committed,row.remaining])),`Headroom = budget − spend − open commitments · ${currency()}`,true)}
-  ${panel(`Budget headroom by project`,bars(`CapEx headroom`,p.map(r=>[r.name,r.remaining])),`Negative headroom flags a potential overrun`)}</div>`;
+  return `<div class="details">${panel(`projects`,`Capital projects`,table(`Capital projects`,[plain(`Project`),money(`Annual budget`),money(`YTD spend`),money(`Open commitments`),money(`Headroom`)],p.map(row=>[row.name,row.budget,row.actual,row.committed,row.remaining])),`Headroom = budget − spend − open commitments · ${currency()}`,true)}
+  ${panel(`headroom`,`Budget headroom by project`,bars(`CapEx headroom`,p.map(r=>[r.name,r.remaining])),`Negative headroom flags a potential overrun`)}</div>`;
 }
 function close(){
   if(state.market)return noMarket(`Financial Close`);
@@ -234,8 +238,8 @@ function close(){
   const consolidated=state.company
     ? [[`Entity as reported`,combined.revenue,combined.cogs,combined.ebitda],[`Included intragroup transfers at cost`,elimination,elimination,0],[`Entity external sales view`,combined.revenue-elimination,combined.cogs-elimination,combined.ebitda]]
     : [[`Combined entity submissions`,combined.revenue,combined.cogs,combined.ebitda],[`Intercompany eliminations`,-elimination,-elimination,0],[`Consolidated group`,closed.revenue,closed.cogs,closed.ebitda]];
-  return `<div class="details">${panel(`Entity close status`,table(`Entity submissions`,[plain(`Company`),plain(`Status`),plain(`Closed on`),money(`Reported revenue`),money(`Intercompany`)],input),`${months[closeMonth]} 2026 close · ${currency()}`,true)}
-  ${panel(`Consolidation reconciliation`,table(`Consolidation reconciliation`,[plain(`Step`),money(`Net revenue`),money(`COGS`),money(`EBITDA`)],consolidated),state.company?`Intragroup amounts are included in the entity submission`:`Transfers at cost are removed from both revenue and COGS`,true)}</div>`;
+  return `<div class="details">${panel(`closeStatus`,`Entity close status`,table(`Entity submissions`,[plain(`Company`),plain(`Status`),plain(`Closed on`),money(`Reported revenue`),money(`Intercompany`)],input),`${months[closeMonth]} 2026 close · ${currency()}`,true)}
+  ${panel(`reconciliation`,`Consolidation reconciliation`,table(`Consolidation reconciliation`,[plain(`Step`),money(`Net revenue`),money(`COGS`),money(`EBITDA`)],consolidated),state.company?`Intragroup amounts are included in the entity submission`:`Transfers at cost are removed from both revenue and COGS`,true)}</div>`;
 }
 const renderers={overview,profit,cash:treasury,working,forecast,manufacturing,capex,close};
 const option=(value,label,selected=false)=>`<option value="${esc(value)}"${selected?` selected`:``}>${esc(label)}</option>`;
@@ -368,7 +372,7 @@ $(`collapse`).addEventListener(`click`,()=>{
 });
 $(`scrim`).addEventListener(`click`,()=>{setMenu(false);$(`menu`).focus();});
 document.addEventListener(`keydown`,e=>{
-  if(e.key===`Escape`&&$(`menu`).getAttribute(`aria-expanded`)===`true`){setMenu(false);$(`menu`).focus();}
+  if(e.key===`Escape`&&!$(`cfo-help`).open&&$(`menu`).getAttribute(`aria-expanded`)===`true`){setMenu(false);$(`menu`).focus();}
 });
 $(`sections`).addEventListener(`click`,e=>{if(e.target.closest(`a`))setMenu(false);});
 $(`view`).addEventListener(`input`,event=>{
@@ -381,6 +385,28 @@ $(`view`).addEventListener(`input`,event=>{
     if(!row.hidden)visible++;
   }
   panel.querySelector(`[data-product-count]`).textContent=`${visible} products`;
+});
+const helpDialog=$(`cfo-help`);
+let helpTrigger;
+$(`view`).addEventListener(`click`,event=>{
+  const trigger=event.target.closest(`[data-info]`);
+  if(!trigger)return;
+  const [title,intro,...details]=explanations[trigger.dataset.info];
+  $(`help-title`).textContent=title;
+  $(`help-intro`).textContent=intro;
+  $(`help-details`).innerHTML=details.map(([label,description])=>
+    `<div><dt><bdi>${esc(label)}</bdi></dt><dd>${esc(description)}</dd></div>`
+  ).join(``);
+  helpTrigger=trigger;
+  helpDialog.showModal();
+  $(`help-scroll`).scrollTop=0;
+});
+helpDialog.addEventListener(`click`,event=>{
+  if(event.target===helpDialog)helpDialog.close();
+});
+helpDialog.addEventListener(`close`,()=>{
+  if(helpTrigger?.isConnected)helpTrigger.focus({preventScroll:true});
+  helpTrigger=null;
 });
 $(`csv`).addEventListener(`click`,exportCsv);
 $(`pdf`).addEventListener(`click`,downloadExecutivePdf);

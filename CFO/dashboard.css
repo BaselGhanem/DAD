@@ -129,3 +129,105 @@ footer{font-size:.72rem;color:var(--muted);margin-top:18px}
 .product-table th{position:sticky;top:0;z-index:1}
 
 .product-scope{margin-bottom:10px;padding:9px 12px;border-radius:8px;background:var(--teal-bg);color:var(--ink);font-size:.84rem}
+
+.metric-shell { position:relative; min-width:0; }
+.metric-shell .metric { height:100%; }
+.cfo-info {
+  display:grid;
+  place-items:center;
+  width:34px;
+  height:34px;
+  flex:none;
+  padding:0;
+  border:1px solid var(--line);
+  border-radius:50%;
+  background:var(--subtle);
+  color:var(--teal);
+  cursor:pointer;
+  transition:background-color .18s,border-color .18s;
+}
+.cfo-info:hover { background:var(--teal-bg); border-color:var(--teal); }
+.info-mark {
+  display:grid;
+  place-items:center;
+  width:16px;
+  height:16px;
+  border:1.4px solid currentColor;
+  border-radius:50%;
+  font:700 11px/1 system-ui,sans-serif;
+}
+.metric-shell .cfo-info { position:absolute; inset-block-start:11px; inset-inline-end:10px; }
+.panel-emphasis .cfo-info { background:#ffffff1a; border-color:#ffffff66; color:#fff; }
+.panel-emphasis .cfo-info:hover { background:#ffffff33; border-color:#fff; }
+.panel-emphasis .cfo-info:focus-visible { outline-color:#fff; }
+
+.cfo-help {
+  width:min(660px,calc(100% - 28px));
+  max-height:calc(100dvh - 28px);
+  padding:0;
+  overflow:hidden;
+  border:1px solid var(--line);
+  border-radius:24px;
+  background:var(--panel);
+  color:var(--ink);
+  box-shadow:0 24px 78px #09172855;
+  font:400 1.11rem/1.85 Almarai,system-ui,sans-serif;
+  text-align:start;
+}
+.cfo-help[open] { animation:cfo-help-in .2s ease-out both; }
+.cfo-help::backdrop { background:#101a2b99; backdrop-filter:blur(4px); }
+.help-sheet {
+  display:flex;
+  flex-direction:column;
+  max-height:calc(100dvh - 30px);
+}
+.help-header {
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:clamp(14px,4vw,25px);
+  background:var(--subtle);
+  border-bottom:1px solid var(--line);
+}
+.help-header h2 {
+  font:800 clamp(1.3rem,3vw,1.8rem)/1.45 Almarai,system-ui,sans-serif;
+  letter-spacing:normal;
+  flex:1;
+}
+.help-symbol {
+  display:grid;
+  place-items:center;
+  width:40px;
+  height:40px;
+  flex:none;
+  border-radius:13px;
+  color:var(--teal);
+  background:var(--teal-bg);
+  font:700 19px/1 system-ui,sans-serif;
+}
+.help-close { width:40px; height:40px; background:var(--panel); color:var(--ink); font:400 25px/1 system-ui,sans-serif; }
+.help-close:hover { background:var(--teal-bg); }
+.help-scroll {
+  min-height:0;
+  overflow:auto;
+  overscroll-behavior:contain;
+  padding:clamp(16px,4vw,25px);
+}
+.help-scroll:focus-visible { outline:2px solid var(--teal); outline-offset:-3px; }
+.help-scroll p, .help-scroll dd { color:var(--muted); overflow-wrap:anywhere; }
+.help-scroll dl { display:grid; gap:9px; margin:16px 0 0; }
+.help-scroll dl:empty { margin:0; }
+.help-scroll dl > div {
+  padding:10px 13px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:var(--subtle);
+}
+.help-scroll dt { color:var(--teal); font-weight:800; overflow-wrap:anywhere; }
+.help-scroll dd { margin:2px 0 0; }
+html:has(.cfo-help[open]) { overflow:hidden; }
+@keyframes cfo-help-in { from { opacity:0; transform:translateY(8px); } }
+@media (prefers-reduced-motion:reduce) {
+  .cfo-help[open] { animation:none; }
+  .cfo-info { transition:none; }
+}
