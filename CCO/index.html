@@ -1,21 +1,69 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#f3f7fa">
-  <title>CCO Workspace | Dar Al Dawa</title>
-  <link rel="stylesheet" href="../assets/executive.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f4f6fb">
+<title>CCO Dashboard | Dar Al Dawa</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&amp;display=swap">
+<link rel="stylesheet" href="../CFO/dashboard.css?v=aligned">
+<link rel="stylesheet" href="./commercial.css">
+<script type="module" src="./commercial.js"></script>
 </head>
 <body>
-  <div class="frame">
-    <header class="masthead"><a class="brand" href="../">Dar Al Dawa</a></header>
-    <main class="pending">
-      <h1>CCO</h1>
-      <h2>Chief Commercial Officer</h2>
-      <p>This dashboard is coming soon.</p>
-      <a class="return" href="../">Back to Executive Dashboards</a>
-    </main>
-  </div>
+<div class="app">
+  <aside class="sidebar" id="navigation" aria-label="Dashboard navigation">
+    <div class="brand-row">
+      <a class="brand" href="../" aria-label="Dar Al Dawa executive portal"><img src="https://www.dadgroup.com/wp-content/uploads/2023/11/uplift-dad-website-05.png" alt="Dar Al Dawa" width="160" height="44"></a>
+      <button class="icon-button collapse" id="collapse" type="button" aria-controls="navigation" aria-expanded="true" aria-label="Collapse navigation"><span class="material-symbols-outlined" aria-hidden="true">chevron_left</span></button>
+    </div>
+    <nav id="sections"></nav>
+    <a class="portal-link" href="../" aria-label="Executive portal"><span class="material-symbols-outlined nav-icon" aria-hidden="true">grid_view</span><span class="nav-label">Executive portal</span></a>
+  </aside>
+  <button class="scrim" id="scrim" type="button" aria-label="Close navigation" hidden></button>
+  <main>
+    <header class="topbar">
+      <button class="button menu" id="menu" type="button" aria-controls="navigation" aria-expanded="false" aria-label="Open navigation"><span class="material-symbols-outlined" aria-hidden="true">menu</span></button>
+      <div class="top-context"><span class="top-title" id="section-title">Commercial Overview</span><span class="top-subtitle">Dar Al Dawa · Executive Dashboard</span></div>
+      <div class="top-actions">
+        <button class="icon-button theme" id="theme" type="button" aria-label="Toggle dark mode" aria-pressed="false"><span class="material-symbols-outlined" id="theme-icon" aria-hidden="true">dark_mode</span></button>
+        <div class="profile"><span class="avatar" aria-hidden="true">CCO</span><span class="profile-name">Chief Commercial Officer</span></div>
+      </div>
+    </header>
+    <div class="cco-toolbar">
+      <div class="switch" id="sales-type" aria-label="Sales basis">
+        <button type="button" data-type="IMS" title="In Market Sales">IMS</button>
+        <button type="button" data-type="TMS" title="To Market Sales">TMS</button>
+      </div>
+      <div class="switch" id="sales-unit" aria-label="Measurement">
+        <button type="button" data-unit="Usd">Value (USD)</button>
+        <button type="button" data-unit="Units">Units</button>
+      </div>
+      <label>Month<select id="month"></select></label>
+      <label>View<select id="period"><option value="month">Month</option><option value="quarter">Quarter to date</option><option value="ytd">YTD</option></select></label>
+      <label>A &amp; B<select id="mode"><option value="all">All Sales vs Budget</option><option value="budgeted">Budgeted Sales vs Budget</option></select></label>
+    </div>
+    <form id="filters" class="filters cco-filters">
+      <label>Country<select id="country"></select></label>
+      <label>Market<select id="market"></select></label>
+      <label>Sector<select id="sector"></select></label>
+      <label>Product Group<select id="group"></select></label>
+      <label>SKU<select id="sku"></select></label>
+    </form>
+    <div class="content">
+      <header class="hero">
+        <div><h1 id="page-title">CCO Dashboard</h1><p id="subtitle"></p><p class="eyebrow" id="scope-label">Dar Al Dawa Group</p></div>
+        <div class="actions">
+          <button class="button" id="excel" type="button"><span class="material-symbols-outlined" aria-hidden="true">file_download</span> Download Excel</button>
+          <button class="button primary" id="pdf" type="button"><span class="material-symbols-outlined" aria-hidden="true">picture_as_pdf</span> Executive PDF</button>
+        </div>
+      </header>
+      <div id="close-note"></div>
+      <section id="view" aria-labelledby="page-title"></section>
+    </div>
+  </main>
+</div>
+<p class="sr-only" id="status" role="status"></p>
+<noscript>This interactive dashboard requires JavaScript.</noscript>
 </body>
 </html>
