@@ -63,9 +63,8 @@ export function executivePdf({period,scope,currency,reference},sections){
     rect(0,PAGE_HEIGHT-110,PAGE_WIDTH,110,COLORS.navy);
     text(`DAR AL DAWA  |  FINANCE`,MARGIN,811,10,true,COLORS.white);
     text(`CFO Executive Summary`,MARGIN,781,23,true,COLORS.white);
-    text(`Demo Data | ${period} | ${currency} | vs ${reference}`,MARGIN,754,10,false,COLORS.white);
+    text(`${period} | ${currency} | vs ${reference}`,MARGIN,754,10,false,COLORS.white);
     text(scope,MARGIN,709,10,true,COLORS.teal);
-    text(`Illustrative figures and allocations`,MARGIN,27,8,false,COLORS.muted);
     text(`Page ${pages.length}`,PAGE_WIDTH-73,27,8,false,COLORS.muted);
     y=684;
   };

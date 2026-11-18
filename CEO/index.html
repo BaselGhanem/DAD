@@ -468,8 +468,7 @@ html :is(.text-on-surface-variant, .text-slate-300, .text-slate-400, .text-slate
 }
 html :is([class~="text-[#099999]"], .text-secondary) { color: var(--theme-accent); }
 html .text-primary { color: var(--theme-heading); }
-html :is(.bg-teal-50, .bg-blue-50, .demo-badge) { background-color: var(--theme-accent-soft); }
-html .demo-badge { color: var(--theme-accent); border-color: var(--theme-border); }
+html :is(.bg-teal-50, .bg-blue-50) { background-color: var(--theme-accent-soft); }
 html .bg-slate-100 { background-color: var(--theme-subtle); }
 html :is(.border-slate-200, .border-slate-100) { border-color: var(--theme-border); }
 html .nav-item { color: var(--theme-muted); }
@@ -609,8 +608,6 @@ html :is(button, a, input, textarea):focus-visible { outline-color: var(--theme-
     </div>
 
     <div class="flex items-center gap-3">
-      <span class="inline-flex shrink-0 items-center rounded-full border border-teal-200 bg-teal-50 px-2.5 py-1 text-xs font-semibold text-teal-800 dark:border-teal-700 dark:bg-teal-950 dark:text-teal-200 demo-badge">Demo Data</span>
-
       <!-- Search -->
       <button onclick="openSearch()" class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100 hover:bg-slate-200 transition-colors" type="button" aria-label="Search">
         <span class="material-symbols-outlined text-slate-400" style="font-size:18px">search</span>
@@ -651,7 +648,7 @@ html :is(button, a, input, textarea):focus-visible { outline-color: var(--theme-
     <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Period:</span>
     <button class="filter-btn" onclick="setFilter('Q1')" data-period="Q1" aria-pressed="false" type="button">Q1 2026</button>
     <button class="filter-btn" onclick="setFilter('Q2')" data-period="Q2" aria-pressed="false" type="button">Q2 2026</button>
-    <button class="filter-btn active" onclick="setFilter('Q3')" data-period="Q3" aria-pressed="true" title="Q3 2026 demo reporting period" type="button">Q3 2026</button>
+    <button class="filter-btn active" onclick="setFilter('Q3')" data-period="Q3" aria-pressed="true" title="Q3 2026 reporting period" type="button">Q3 2026</button>
     <button class="filter-btn" onclick="setFilter('Q4')" data-period="Q4" aria-pressed="false" type="button">Q4 2026 Forecast</button>
     <button class="filter-btn" onclick="setFilter('YTD')" data-period="YTD" aria-pressed="false" type="button">YTD 2026</button>
   <span id="period-context" class="ml-auto text-xs text-slate-500 font-medium" role="status"></span></div>
@@ -1140,15 +1137,15 @@ html :is(button, a, input, textarea):focus-visible { outline-color: var(--theme-
 <script>
 
 const PERIODS = {
-  Q1: { label: `Q1 2026`, context: `Jan–Mar 2026 · Demo actuals`, end: 0 },
-  Q2: { label: `Q2 2026`, context: `Apr–Jun 2026 · Demo actuals`, end: 1 },
-  Q3: { label: `Q3 2026`, context: `Jul–Sep 2026 · Demo actuals`, end: 2 },
-  Q4: { label: `Q4 2026 Forecast`, context: `Oct–Dec 2026 · Demo forecast`, end: 3 },
-  YTD: { label: `YTD 2026`, context: `Jan–Sep 2026 · Demo actuals`, end: 2 },
+  Q1: { label: `Q1 2026`, context: `Jan–Mar 2026 · Actuals`, end: 0 },
+  Q2: { label: `Q2 2026`, context: `Apr–Jun 2026 · Actuals`, end: 1 },
+  Q3: { label: `Q3 2026`, context: `Jul–Sep 2026 · Actuals`, end: 2 },
+  Q4: { label: `Q4 2026 Forecast`, context: `Oct–Dec 2026 · Forecast`, end: 3 },
+  YTD: { label: `YTD 2026`, context: `Jan–Sep 2026 · Actuals`, end: 2 },
 };
 const QUARTERS = [`Q1`, `Q2`, `Q3`, `Q4`];
 
-// Each series lists the four demo quarters followed by the closed-period YTD value.
+// Each series lists the four quarters followed by the closed-period YTD value.
 const REPORT = {
   marketing: {
     metrics: [
@@ -1560,7 +1557,7 @@ function openDraft(kind, notice = ``, periodKey = currentFilter) {
   const type = DRAFT_TYPES[kind];
   const storedDrafts = readDrafts();
   const drafts = storedDrafts.filter(draft => draft.kind === kind && draft.period === periodKey);
-  openActionDialog(type.title, `${PERIODS[periodKey].label} · Demo workspace`, `
+  openActionDialog(type.title, `${PERIODS[periodKey].label}`, `
     <form id="draft-form" data-kind="${kind}" data-draft-period="${periodKey}" class="action-stack">
       <label for="draft-name">${type.field}</label>
       <input id="draft-name" name="name" required maxlength="100" />
@@ -1604,10 +1601,10 @@ function downloadCsv() {
   const title = SEARCH_ITEMS.find(item => item.id === currentSection).label;
   const report = REPORT[currentSection];
   const rows = [
-    [`Section`, `Period`, `Data type`, `Category`, `Item`, `Value`],
-    ...report.metrics.map(metric => [title, PERIODS[currentFilter].label, `Demo Data`, `KPI`, metric[0], periodValue(metric)]),
+    [`Section`, `Period`, `Category`, `Item`, `Value`],
+    ...report.metrics.map(metric => [title, PERIODS[currentFilter].label, `KPI`, metric[0], periodValue(metric)]),
     ...Array.from(section.querySelectorAll(`[data-period-panel]`), panel => [
-      title, PERIODS[currentFilter].label, `Demo Data`, `Section detail`, panel.querySelector(`h3`).textContent,
+      title, PERIODS[currentFilter].label, `Section detail`, panel.querySelector(`h3`).textContent,
       panel.querySelector(`.period-panel-body`).innerText.trim(),
     ]),
   ];
@@ -1626,7 +1623,7 @@ function reportPreview() {
   const label = SEARCH_ITEMS.find(item => item.id === currentSection).label;
   const report = REPORT[currentSection];
   const risk = report.risks[PERIODS[currentFilter].end];
-  openActionDialog(`${label} Report`, `${PERIODS[currentFilter].context} · Demo Data`, `
+  openActionDialog(`${label} Report`, `${PERIODS[currentFilter].context}`, `
     <dl class="action-stack">${report.metrics.map(metric => `<div class="action-list-item"><dt>${metric[0]}</dt><dd><strong>${periodValue(metric)}</strong></dd></div>`).join(``)}</dl>
     <p class="action-list-item"><strong>Watch item</strong><br>${risk}</p>
     <div class="action-controls"><button type="button" class="action-primary" data-action="print">Print / Save PDF</button>
@@ -1647,14 +1644,14 @@ function runAction(action) {
           <li>Select a period to refresh the report. YTD covers January to September 2026.</li>
           <li>Use Ctrl+K or ⌘K to find a department or metric.</li>
           <li>Export the active department as CSV or use the print dialog to save a PDF.</li>
-          <li>Strategies and deals are demo drafts stored in this browser when local storage is available.</li>
+          <li>Strategies and deals are drafts stored in this browser when local storage is available.</li>
         </ul>`);
       break;
     case `status`:
       readDrafts();
-      openActionDialog(`System Status`, `This dashboard uses an embedded demo dataset.`, `
+      openActionDialog(`System Status`, `This dashboard uses an embedded dataset.`, `
         <dl class="action-stack">
-          <div class="action-list-item"><dt>Dataset</dt><dd>Demo Data · 2026</dd></div>
+          <div class="action-list-item"><dt>Dataset</dt><dd>2026</dd></div>
           <div class="action-list-item"><dt>Active period</dt><dd>${PERIODS[currentFilter].context}</dd></div>
           <div class="action-list-item"><dt>Departments</dt><dd>${Object.keys(REPORT).length} available</dd></div>
           <div class="action-list-item"><dt>Draft storage</dt><dd>${draftStorageAvailable ? `Browser storage enabled` : `Session memory only`}</dd></div>

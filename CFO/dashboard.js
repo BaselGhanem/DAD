@@ -2,7 +2,7 @@ import {
   closedMonth, months, entities, markets, products, references, range, scopeEntities, tradeRows,
   statement, bridge, financials, intercompany, fyRows, workingCapital, cashSchedule, capexProjects,
 } from "./model.js?v=markets";
-import {executivePdf} from "./executive-pdf.js?v=1";
+import {executivePdf} from "./executive-pdf.js?v=2";
 
 const views = {
   overview:[`Executive Overview`,`dashboard`,`Profitability, liquidity and priorities at a glance.`],
@@ -87,7 +87,7 @@ function waterfall(start, contributions, end, title, labels=[`Reference EBITDA`,
 const noMarket = text=>panel(text,`<p class="empty">This measure is reported at company and group level.</p><a href="${esc(hashFor(state.page,{market:``}))}">${state.company?`View company totals`:`View group totals`}</a>`);
 const stat=(label,value)=>`<div class="statline"><span>${esc(label)}</span><strong>${esc(value)}</strong></div>`;
 const aggregate=(rows, key, value)=>Array.from(rows.reduce((m,r)=>m.set(r[key],(m.get(r[key])||0)+value(r)),new Map()));
-const merchants = [`Demo Pharmacy Network`,`Demo Hospital Supply`,`Demo Wholesale Group`,`Other customer accounts`];
+const merchants = [`Pharmacy Network`,`Hospital Supply`,`Wholesale Group`,`Other customer accounts`];
 const dateAt=(month,day)=>Date.UTC(2026,month,day);
 const displayDate=new Intl.DateTimeFormat(`en-GB`,{day:`numeric`,month:`short`,timeZone:`UTC`});
 const metricInfo=[
@@ -188,9 +188,9 @@ function working(d){
   ];
   const overdue=d.wc.ar*.22;
   return `<div class="details">
-  ${state.market?noMarket(`Cash conversion cycle`):panel(`Cash conversion cycle`,table(`Cash conversion cycle`,[plain(`Metric`),dayColumn(`Actual`),dayColumn(references[state.compare])],[`dso`,`dio`,`dpo`,`ccc`].map(k=>[k.toUpperCase(),d.wc[k],d.baseWC[k]])),`Demo month-end balances divided by current-month activity × 30`)}
+  ${state.market?noMarket(`Cash conversion cycle`):panel(`Cash conversion cycle`,table(`Cash conversion cycle`,[plain(`Metric`),dayColumn(`Actual`),dayColumn(references[state.compare])],[`dso`,`dio`,`dpo`,`ccc`].map(k=>[k.toUpperCase(),d.wc[k],d.baseWC[k]])),`Month-end balances divided by current-month activity × 30`)}
   ${panel(`Accounts receivable aging`,bars(`Receivable aging`,debt),`Aged by days past due · ${currency()}`)}
-  ${panel(`Largest overdue customers`,table(`Overdue customers`,[plain(`Demo account`),money(`Past due >60 days`)],merchants.map((name,i)=>[name,overdue*[.34,.27,.22,.17][i]])),`Reconciles to the 61+ day buckets`)}
+  ${panel(`Largest overdue customers`,table(`Overdue customers`,[plain(`Account`),money(`Past due >60 days`)],merchants.map((name,i)=>[name,overdue*[.34,.27,.22,.17][i]])),`Reconciles to the 61+ day buckets`)}
   ${panel(`Supplier obligations`,table(`Supplier obligations`,[plain(`Payment window`),money(`Payables`)],[[`Next 7 days`,d.wc.ap*.22],[`8–30 days`,d.wc.ap*.39],[`31–60 days`,d.wc.ap*.27],[`Later`,d.wc.ap*.12]]),`Open amounts by due window · ${currency()}`)}
   ${panel(`Inventory health`,table(`Inventory health`,[plain(`Product`),money(`Stock value`),money(`Slow-moving`),money(`Expires in 90 days`)],inventoryRows(d),true),`Risk categories can overlap · ${currency()}`,true)}</div>`;
 }
@@ -200,7 +200,7 @@ function forecast(){
   const lines=[[`External net revenue`,`revenue`],[`Gross profit`,`gross`],[`Operating expenses`,`opex`],[`EBITDA`,`ebitda`]];
   return `<div class="details">${panel(`FY 2026 outlook`,table(`Full-year outlook`,[plain(`Measure`),money(`Current`),money(`Previous`),money(`Movement`),money(`Budget`),money(`vs Budget`)],lines.map(([label,k])=>[label,a[k],b[k],a[k]-b[k],plan[k],a[k]-plan[k]])),`Actuals through Oct plus Nov–Dec forecast · ${currency()}`,true)}
   ${panel(`What moved the forecast`,waterfall(b.ebitda,bridge(latest,previous),a.ebitda,`Forecast EBITDA bridge`,[`Previous EBITDA`,`Current EBITDA`]),`Previous to current forecast · ${currency()}`)}
-  ${panel(`Forecast basis`,stat(`Closed actuals`,`Jan–Oct 2026`)+stat(`Forward months`,`Nov–Dec 2026`)+stat(`Current comparison`,`Previous forecast and budget`)+`<p class="caption">The full-year comparison uses the latest published demo forecast for the selected company and market.</p>`)}</div>`;
+  ${panel(`Forecast basis`,stat(`Closed actuals`,`Jan–Oct 2026`)+stat(`Forward months`,`Nov–Dec 2026`)+stat(`Current comparison`,`Previous forecast and budget`)+`<p class="caption">The full-year comparison uses the latest forecast for the selected company and market.</p>`)}</div>`;
 }
 function manufacturing(d){
   const categories=products.map(product=>{
@@ -294,7 +294,7 @@ const exportValue=(col,value)=>{
 };
 const csvCell=value=>`"${String(value).replaceAll(`"`,`""`)}"`;
 function exportCsv(){
-  const metadata=[periodLabel(),$(`scope-label`).textContent,currency(),references[state.compare],`Demo Data`];
+  const metadata=[periodLabel(),$(`scope-label`).textContent,currency(),references[state.compare]];
   const output=blocks.flatMap(({title,columns,rows})=>[
     [...metadata,title],columns.map(c=>c.label),...rows.map(row=>row.map((v,i)=>exportValue(columns[i],v))),[],
   ]).map(row=>row.map(csvCell).join(`,`)).join(`\r\n`);
