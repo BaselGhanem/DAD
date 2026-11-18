@@ -1,7 +1,8 @@
 import {
-  closedMonth, months, entities, products, references, range, scopeEntities, tradeRows,
+  closedMonth, months, entities, markets, products, references, range, scopeEntities, tradeRows,
   statement, bridge, financials, intercompany, fyRows, workingCapital, cashSchedule, capexProjects,
-} from "./model.js?v=products";
+} from "./model.js?v=markets";
+import {executivePdf} from "./executive-pdf.js?v=1";
 
 const views = {
   overview:[`Executive Overview`,`dashboard`,`Profitability, liquidity and priorities at a glance.`],
@@ -19,6 +20,7 @@ const state={page:`overview`,month:closedMonth,compare:`budget`,company:``,marke
 let blocks=[];
 const periodLabel=()=>`${months[state.month]} 2026`;
 const entity=()=>entities.find(e=>e.id===state.company);
+const availableMarkets=company=>company?markets.filter(name=>company.markets.some(([market])=>market===name)):markets;
 const currency=()=>state.local&&entity()?entity().currency:`USD`;
 const rate=()=>state.local&&entity()?entity().rate:1;
 const fmt=new Intl.NumberFormat(`en-US`,{maximumFractionDigits:0});
@@ -82,7 +84,7 @@ function waterfall(start, contributions, end, title, labels=[`Reference EBITDA`,
     return `<div class="chart-row"><span>${esc(label)}</span><span class="track" aria-hidden="true"><i class="${value<0?`negative`:``}" style="margin-left:${offset}%;width:${width}%"></i></span><b>${i===0||i===steps.length-1?cash(value):sign(value,cash)}</b></div>`;
   }).join(``)}</div>`;
 }
-const noMarket = text=>panel(text,`<p class="empty">This measure is reported at company and group level.</p><a href="${esc(hashFor(state.page,{market:``}))}">View company totals</a>`);
+const noMarket = text=>panel(text,`<p class="empty">This measure is reported at company and group level.</p><a href="${esc(hashFor(state.page,{market:``}))}">${state.company?`View company totals`:`View group totals`}</a>`);
 const stat=(label,value)=>`<div class="statline"><span>${esc(label)}</span><strong>${esc(value)}</strong></div>`;
 const aggregate=(rows, key, value)=>Array.from(rows.reduce((m,r)=>m.set(r[key],(m.get(r[key])||0)+value(r)),new Map()));
 const merchants = [`Demo Pharmacy Network`,`Demo Hospital Supply`,`Demo Wholesale Group`,`Other customer accounts`];
@@ -133,7 +135,7 @@ function overview(d){
     const visible=!state.market||!m.entityOnly;
     const delta=current[m.key]-reference[m.key];
     const marker=m.key===`nwc`?``:delta<0?`bad`:`good`;
-    return `<a class="metric" href="${esc(hashFor(m.page,{metric:m.key}))}"><span class="metric-icon material-symbols-outlined" aria-hidden="true">${m.icon}</span><span class="metric-label">${esc(m.label)}</span><strong class="metric-value">${visible?m.format(current[m.key]):`—`}</strong><small class="${marker}">${visible?`${sign(delta,m.delta||m.format)} vs ${references[state.compare]}`:`Company-level measure`}</small><small>${visible?m.stock?`Month-end balance`:`YTD ${m.format(ytd[m.key])}`:`See company view`}</small></a>`;
+    return `<a class="metric" href="${esc(hashFor(m.page,{metric:m.key}))}"><span class="metric-icon material-symbols-outlined" aria-hidden="true">${m.icon}</span><span class="metric-label">${esc(m.label)}</span><strong class="metric-value">${visible?m.format(current[m.key]):`—`}</strong><small class="${marker}">${visible?`${sign(delta,m.delta||m.format)} vs ${references[state.compare]}`:`Company-level measure`}</small><small>${visible?m.stock?`Month-end balance`:`YTD ${m.format(ytd[m.key])}`:`Clear market to view`}</small></a>`;
   }).join(``);
   const summaries=alerts(d);
   blocks.push({title:`Executive KPIs`,columns:[plain(`KPI`),plain(`Actual`),plain(`Reference`),plain(`YTD`)],rows:metricInfo.filter(m=>!state.market||!m.entityOnly).map(m=>[m.label,m.format(current[m.key]),m.format(reference[m.key]),m.stock?`Month-end`:m.format(ytd[m.key])])});
@@ -228,7 +230,7 @@ function close(d){
   const consolidated=state.company
     ? [[`Entity as reported`,combined.revenue,combined.cogs,combined.ebitda],[`Included intragroup transfers at cost`,elimination,elimination,0],[`Entity external sales view`,combined.revenue-elimination,combined.cogs-elimination,combined.ebitda]]
     : [[`Combined entity submissions`,combined.revenue,combined.cogs,combined.ebitda],[`Intercompany eliminations`,-elimination,-elimination,0],[`Consolidated group`,d.actual.revenue,d.actual.cogs,d.actual.ebitda]];
-  return `<div class="details">${panel(`Entity close status`,table(`Entity submissions`,[plain(`Demo company`),plain(`Status`),plain(`Closed on`),money(`Reported revenue`),money(`Intercompany`)],input),`${periodLabel()} · ${currency()}`,true)}
+  return `<div class="details">${panel(`Entity close status`,table(`Entity submissions`,[plain(`Company`),plain(`Status`),plain(`Closed on`),money(`Reported revenue`),money(`Intercompany`)],input),`${periodLabel()} · ${currency()}`,true)}
   ${panel(`Consolidation reconciliation`,table(`Consolidation reconciliation`,[plain(`Step`),money(`Net revenue`),money(`COGS`),money(`EBITDA`)],consolidated),state.company?`Intragroup amounts are included in the entity submission`:`Transfers at cost are removed from both revenue and COGS`,true)}</div>`;
 }
 const renderers={overview,profit,cash:treasury,working,forecast,manufacturing,capex,close};
@@ -243,7 +245,7 @@ function parse(){
     month:Number.isInteger(n)&&n>=0&&n<=closedMonth?n:closedMonth,
     compare:[`budget`,`prior`,`forecast`].includes(q.get(`compare`))?q.get(`compare`):`budget`,
     company:company?.id||``,
-    market:company?.markets.some(([m])=>m===q.get(`market`))?q.get(`market`):``,
+    market:availableMarkets(company).includes(q.get(`market`))?q.get(`market`):``,
     local:Boolean(company&&q.get(`currency`)===`local`),
     metric:metricInfo.some(m=>m.key===q.get(`metric`))||q.get(`metric`)===`inventory`?q.get(`metric`):``,
   });
@@ -260,9 +262,8 @@ function update(){
   $(`subtitle`).textContent=`${label?`${label} · `:``}${subtitle}`;
   $(`period`).innerHTML=months.slice(0,closedMonth+1).map((m,i)=>option(i+1,`${m} 2026${i===closedMonth?` · latest close`:``}`,state.month===i)).join(``);
   $(`compare`).value=state.compare;
-  $(`company`).innerHTML=option(``,`Consolidated group`,!entity())+entities.map(e=>option(e.id,e.name,e.id===state.company)).join(``);
-  $(`market`).innerHTML=option(``,`All markets`,!state.market)+(entity()?.markets||[]).map(([m])=>option(m,m,m===state.market)).join(``);
-  $(`market`).disabled=!entity();
+  $(`company`).innerHTML=option(``,`Consolidated group`,!entity())+entities.map(e=>option(e.id,`${e.code} · ${e.name}`,e.id===state.company)).join(``);
+  $(`market`).innerHTML=option(``,`All markets`,!state.market)+availableMarkets(entity()).map(m=>option(m,m,m===state.market)).join(``);
   $(`currency`).innerHTML=option(`usd`,`USD`,!state.local)+(entity()?option(`local`,`${entity().currency} · local`,state.local):``);
   $(`currency`).disabled=!entity();
   $(`sections`).innerHTML=Object.entries(views).map(([key,[name,icon]])=>`<a href="${esc(hashFor(key,{metric:``}))}" aria-label="${esc(name)}" title="${esc(name)}"${key===state.page?` aria-current="page"`:``}><span class="nav-icon material-symbols-outlined" aria-hidden="true">${icon}</span><span class="nav-label">${esc(name)}</span></a>`).join(``);
@@ -274,7 +275,7 @@ function setFilter(e){
   const value=e.target.value;
   const change={
     period:{month:Number(value)-1},compare:{compare:value},
-    company:{company:value,market:``,local:false},
+    company:{company:value,local:false},
     market:{market:value},currency:{local:value===`local`},
   }[e.target.id];
   if(change)history.replaceState(null,``,hashFor(state.page,change));
@@ -297,24 +298,40 @@ function exportCsv(){
   const output=blocks.flatMap(({title,columns,rows})=>[
     [...metadata,title],columns.map(c=>c.label),...rows.map(row=>row.map((v,i)=>exportValue(columns[i],v))),[],
   ]).map(row=>row.map(csvCell).join(`,`)).join(`\r\n`);
-  const url=URL.createObjectURL(new Blob([`\uFEFF`,output],{type:`text/csv;charset=utf-8`}));
+  downloadFile(new Blob([`\uFEFF`,output],{type:`text/csv;charset=utf-8`}),`DAD-CFO-${state.page}-${downloadPeriod()}.csv`);
+  $(`status`).textContent=`Analysis exported as CSV.`;
+}
+const downloadPeriod=()=>`2026-${String(state.month+1).padStart(2,`0`)}`;
+function downloadFile(blob,filename){
+  const url=URL.createObjectURL(blob);
   const link=document.createElement(`a`);
   link.href=url;
-  link.download=`DAD-CFO-${state.page}-2026-${String(state.month+1).padStart(2,`0`)}.csv`;
+  link.download=filename;
   document.body.append(link);
   link.click();
   link.remove();
   setTimeout(()=>URL.revokeObjectURL(url),1500);
-  $(`status`).textContent=`Analysis exported as CSV.`;
 }
-function printExecutive(){
+function downloadExecutivePdf(){
   const original=blocks;
-  blocks=[];
-  overview(sectionData());
-  const reportBlocks=blocks.filter(block=>block.title===`Executive KPIs`||block.title===`Priority watchlist`||block.title===`Closing cash`||block.title===`EBITDA comparison`);
-  $(`print-report`).innerHTML=`<h1>Dar Al Dawa | CFO Executive Summary</h1><p>Demo Data · ${esc(periodLabel())} · ${esc($(`scope-label`).textContent)} · ${currency()} · vs ${references[state.compare]}</p>${reportBlocks.map(block=>`<section><h2>${esc(block.title)}</h2>${table(block.title,block.columns,block.rows)}</section>`).join(``)}`;
-  blocks=original;
-  window.print();
+  let reportBlocks;
+  try{
+    blocks=[];
+    overview(sectionData());
+    reportBlocks=blocks;
+  }finally{
+    blocks=original;
+  }
+  const sections=reportBlocks.map(({title,columns,rows})=>({
+    title,
+    columns:columns.map(col=>col.label),
+    rows:rows.map(row=>row.map((value,index)=>fmtCell(columns[index],value))),
+  }));
+  const pdf=executivePdf({
+    period:periodLabel(),scope:$(`scope-label`).textContent,currency:currency(),reference:references[state.compare],
+  },sections);
+  downloadFile(new Blob([pdf],{type:`application/pdf`}),`DAD-CFO-Executive-${downloadPeriod()}.pdf`);
+  $(`status`).textContent=`Executive PDF downloaded.`;
 }
 const applyTheme=dark=>{
   document.documentElement.classList.toggle(`dark`,dark);
@@ -358,6 +375,6 @@ $(`view`).addEventListener(`input`,event=>{
   panel.querySelector(`[data-product-count]`).textContent=`${visible} products`;
 });
 $(`csv`).addEventListener(`click`,exportCsv);
-$(`pdf`).addEventListener(`click`,printExecutive);
+$(`pdf`).addEventListener(`click`,downloadExecutivePdf);
 window.addEventListener(`hashchange`,()=>{update();setMenu(false);window.scrollTo(0,0);});
 update();

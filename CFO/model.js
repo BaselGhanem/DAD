@@ -1,9 +1,20 @@
 export const closedMonth = 9;
 export const months = [`Jan`,`Feb`,`Mar`,`Apr`,`May`,`Jun`,`Jul`,`Aug`,`Sep`,`Oct`,`Nov`,`Dec`];
+export const markets = [
+  `Algeria`, `Bahrain`, `HongKong`, `Iraq`, `Jordan`, `Kuwait`, `Lebanon`, `Libya`,
+  `Morocco`, `Oman`, `Qatar`, `Saudi`, `Somalia`, `South Sudan`, `Sudan`, `UAE`,
+  `Uganda`, `Yemen`, `Zambia`,
+];
+
+// Market names and company names are supplied. Portfolio assignments and weights are demo assumptions.
+const exportMarkets = markets.filter(name=>name!==`Jordan`&&name!==`Algeria`);
+const exportWeights = exportMarkets.map((_,index)=>1+(index*7)%11);
+const totalExportWeight = exportWeights.reduce((sum,weight)=>sum+weight,0);
 export const entities = [
-  {id:`levant`, name:`Demo Levant Pharma`, currency:`JOD`, rate:.709, size:1, markets:[[`Jordan`,.81],[`Algeria`,.19]]},
-  {id:`maghreb`, name:`Demo Maghreb Distribution`, currency:`DZD`, rate:134, size:.61, markets:[[`Algeria`,.87],[`Tunisia`,.13]]},
-  {id:`europe`, name:`Demo Europe Commercial`, currency:`RON`, rate:4.53, size:.39, markets:[[`Romania`,1]]},
+  {id:`levant`, code:`1000`, name:`Dar Al Dawa – Jordan`, currency:`JOD`, rate:.709, size:1.39,
+    markets:[[`Jordan`,.53],...exportMarkets.map((name,index)=>[name,.47*exportWeights[index]/totalExportWeight])]},
+  {id:`maghreb`, code:`2000`, name:`Dar Al Dawa – Algeria`, currency:`DZD`, rate:134, size:.61,
+    markets:[[`Algeria`,1]]},
 ];
 const productNames = [
   `Amuretic`,
@@ -127,14 +138,14 @@ export function scopeEntities(scope) {
 }
 export function tradeRows(scope, periods, reference = `actual`) {
   const rules = assumptions[reference];
-  return scopeEntities(scope).flatMap((entity)=>periods.flatMap(month=>entity.markets.flatMap(([market, share],mi)=>{
+  return scopeEntities(scope).flatMap((entity)=>periods.flatMap(month=>entity.markets.flatMap(([market, share])=>{
     if (scope.market && market !== scope.market) return [];
     return products.map(product=>{
       const seasonal = 1 + month*.019 + [0,.025,-.018,.012][month%4];
       const quantity = 290000 * entity.size * share * product.share * seasonal * rules.volume * rules.mix[product.profile];
       return {
         company:entity.name, market, product:product.name, month,
-        quantity, price:product.unitPrice*rules.price*(1+mi*.013),
+        quantity, price:product.unitPrice*rules.price*(market===`Jordan`||market===`Algeria`?1:1.013),
         material:product.material*rules.material*(1+month*.0015),
         conversion:product.conversion*rules.conversion,
         commercial:quantity*1.02*rules.opex,
